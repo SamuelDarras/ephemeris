@@ -27,17 +27,6 @@ function verifyJwt(req, res) {
     return null
 }
 
-function verifyEvent(rdv) {
-    let errors = [];
-    if (typeof rdv.date === 'undefined') {
-        errors.push({ field: "date", errorMsg: "Le format de la date n'est pas valide" })
-    }
-    if (rdv.title === "") {
-        errors.push({ field: "title", errorMsg: "Le titre est obligatoire" })
-    }
-    return errors
-}
-
 app.post("/connect/", (req, res) => {
     User.findOne().where({ name: req.body.name, password: req.body.password }).exec((err, user) => {
         let jwtSecretKey = process.env.JWT_SECRET_KEY
@@ -127,17 +116,20 @@ app.post("/event/edit/:id", async (req, res) => {
         }
 
         if(data.userId == rdv.owner._id){
-            try{
-                await RendezVous.updateOne({_id: req.params.id}, req.body, {runValidators: true})
-            } catch(err){
-                res.status(400).send(err)
-                return
-            }        
-            res.status(200).json({
-                actions: [
-                    { link: `/event/get/${rdv._id}`, method: "get" },
-                    { link: `/event/delete/${rdv._id}`, method: "delete" }
-                ]
+            RendezVous.findByIdAndUpdate({_id: req.params.id}, req.body, {runValidators: true}, (err, rdvUpdated) => {
+                if(err){
+                    console.log(err)
+                    res.status(400).send(err)
+                }
+                else{
+                    res.status(200).json({
+                        rdv: rdvUpdated,
+                        actions: [
+                            { link: `/event/get/${rdv._id}`, method: "get" },
+                            { link: `/event/delete/${rdv._id}`, method: "delete" }
+                        ]
+                    })
+                }
             })
         }
         else{
