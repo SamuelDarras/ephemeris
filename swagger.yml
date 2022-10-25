@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Ephemeris
+  version: 1.0.0
+servers:
+  - url: localhost:3000
+
+paths:
+  /event/create:
+    post:
+      summary: Créé un nouveau RendezVous
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                date: 
+                  type: string
+                place: 
+                  type: string
+                description:
+                  type: string
+              required:
+                - title
+                - date
+      responses:
+        '200':    # status code
+          description: un objet RendezVous et les actions possibles
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  rdv:
+                    type: object
+                    properties:
+                      title: 
+                        type: string
+                      date: 
+                        type: string
+                      place: 
+                        type: string
+                      description: 
+                        type: string
+                      owner: 
+                        type: string
+                      _id:
+                        type: string
+                      __v: 
+                        type: integer
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        link:
+                          type: string
+                        method: 
+                          type: string

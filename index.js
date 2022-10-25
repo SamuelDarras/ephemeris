@@ -4,6 +4,10 @@ import cors from "cors"
 import bodyParser from "body-parser"
 import env from "dotenv"
 import jwt from "jsonwebtoken"
+import fs from "fs"
+import yaml from "js-yaml"
+
+import swaggerUi from "swagger-ui-express"
 
 import { RendezVous, User } from "./models.js"
 
@@ -15,6 +19,9 @@ app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+
+const swaggerDocument = yaml.load(fs.readFileSync('./swagger.yml', 'utf8'))
+
 
 function verifyJwt(req, res) {
     if (req.headers && req.headers.authorization) {
@@ -163,4 +170,6 @@ app.delete("/event/delete/:id", async (req, res) => {
         }
     }
 })
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 app.listen(3000)
