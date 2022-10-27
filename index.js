@@ -10,6 +10,7 @@ import yaml from "js-yaml"
 import swaggerUi from "swagger-ui-express"
 
 import { RendezVous, User } from "./models.js"
+import { request } from "http"
 
 mongoose.connect('mongodb+srv://dbUser:dbUserPassword@cluster0.fvrfwzh.mongodb.net/ephemeris?retryWrites=true&w=majority').then().catch(console.log)
 env.config()
@@ -36,14 +37,26 @@ function verifyJwt(req, res) {
 
 app.post("/connect/", (req, res) => {
     User.findOne().where({ name: req.body.name, password: req.body.password }).exec((err, user) => {
-        let jwtSecretKey = process.env.JWT_SECRET_KEY
-        let data = {
-            time: Date(),
-            userId: user._id
-        }
-        const token = jwt.sign(data, jwtSecretKey)
 
-        res.send(token)
+        if(user === null){
+            res.status(400).json({
+                title: "Bad request",
+                body: "incorrect name or password"
+            });
+        }
+        else{
+            let jwtSecretKey = process.env.JWT_SECRET_KEY
+            let data = {
+                time: Date(),
+                userId: user._id
+            }
+            const token = jwt.sign(data, jwtSecretKey)
+
+            res.json({
+                user: user,
+                token: token
+            })
+        }
     })
 })
 
@@ -172,4 +185,8 @@ app.delete("/event/delete/:id", async (req, res) => {
 })
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-app.listen(3000)
+
+//bind repository for client view
+app.use(express.static("public"));
+
+app.listen(3000, () => {console.log("serveur lance");})

@@ -7,7 +7,7 @@
 * mise à jour en temps réél: WebSockets
 
 ## Frontend
-* concisecss.com
+* bootstrap 5.2
 
 # Options supplémentaires
 * Événements récurrents
