@@ -16,7 +16,9 @@ mongoose.connect('mongodb+srv://dbUser:dbUserPassword@cluster0.fvrfwzh.mongodb.n
 env.config()
 
 const app = express()
-app.use(cors())
+app.use(cors({
+    origin: '*'
+}));
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
