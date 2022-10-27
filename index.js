@@ -10,7 +10,6 @@ import yaml from "js-yaml"
 import swaggerUi from "swagger-ui-express"
 
 import { RendezVous, User } from "./models.js"
-import { request } from "http"
 
 mongoose.connect('mongodb+srv://dbUser:dbUserPassword@cluster0.fvrfwzh.mongodb.net/ephemeris?retryWrites=true&w=majority').then().catch(console.log)
 env.config()
@@ -31,20 +30,43 @@ function verifyJwt(req, res) {
         } catch (e) {
         }
     }
-    res.status(401).send("unauthorized")
+    sendError(res, UNAUTHORIZED)
     return null
+}
+
+async function checkConnected(req, res, ok, ko = () => { }) {
+    let data = verifyJwt(req, res)
+    if (data) {
+        let user = await User.findById(data.userId)
+        ok(user)
+    } else {
+        ko()
+    }
+}
+
+const BAD_REQUEST = 400
+const UNAUTHORIZED = 401
+const RESSOURCE_NOT_FOUND = 404
+function sendError(res, code, err = "") {
+    let map = {
+        [BAD_REQUEST]: "Bad request",
+        [UNAUTHORIZED]: "Unauthorized",
+        [RESSOURCE_NOT_FOUND]: "Ressource not found",
+    }
+    res.status(code).json({
+        message: map[code],
+        err: err
+    })
 }
 
 app.post("/connect/", (req, res) => {
     User.findOne().where({ name: req.body.name, password: req.body.password }).exec((err, user) => {
-
-        if(user === null){
-            res.status(400).json({
+        if (user === null) {
+            sendError(res, BAD_REQUEST, {
                 title: "Bad request",
                 body: "incorrect name or password"
-            });
-        }
-        else{
+            })
+        } else {
             let jwtSecretKey = process.env.JWT_SECRET_KEY
             let data = {
                 time: Date(),
@@ -53,35 +75,27 @@ app.post("/connect/", (req, res) => {
             const token = jwt.sign(data, jwtSecretKey)
 
             res.json({
-                user: user,
+                user: user.name,
                 token: token
             })
         }
     })
 })
 
-app.get("/test/", (req, res) => {
-    let r = verifyJwt(req, res)
-    console.log(r)
-    res.send("Ok")
-})
-
 app.post("/event/create/", async (req, res) => {
-    let data = verifyJwt(req, res)
-    if (data) {
-        let user = await User.findById(data.userId)
+    checkConnected(req, res, async (user) => {
         let rdv = new RendezVous({
             title: req.body.title,
-            date: new Date(req.body.date),
+            date: req.body.date,
             place: req.body.place,
             description: req.body.description,
             owner: user._id
         })
 
-        try{
+        try {
             await rdv.save()
-        } catch(err){
-            res.status(400).json(err)
+        } catch (err) {
+            sendError(res, BAD_REQUEST, err.errors)
             return
         }
         res.status(200).json({
@@ -92,22 +106,22 @@ app.post("/event/create/", async (req, res) => {
                 { link: `/event/delete/${rdv._id}`, method: "delete" }
             ]
         })
-    }
+    })
 })
 
 app.get("/event/get/:id", async (req, res) => {
-    let data = verifyJwt(req, res)
-    if (data) {
-        if(!isValidObjectId(req.params.id)){
-            res.status(400).send("bad request")
+    checkConnected(req, res, async (user) => {
+        if (!isValidObjectId(req.params.id)) {
+            sendError(res, BAD_REQUEST)
             return
         }
+
         let rdv = await RendezVous.findById(req.params.id)
-        if(!rdv){
-            res.status(404).send("ressource not found")
+        if (!rdv) {
+            sendError(res, RESSOURCE_NOT_FOUND)
             return
         }
-        if(data.userId == rdv.owner._id){
+        if (rdv.owner._id.equals(user._id)) {
             res.status(200).json({
                 rdv: rdv,
                 actions: [
@@ -115,78 +129,74 @@ app.get("/event/get/:id", async (req, res) => {
                     { link: `/event/delete/${rdv._id}`, method: "delete" }
                 ]
             })
+        } else {
+            sendError(res, UNAUTHORIZED)
         }
-        else{
-            res.status(401).send("unauthorized")
-        }
-    }
+
+    })
 })
 
 app.post("/event/edit/:id", async (req, res) => {
-    let data = verifyJwt(req, res)
-    if (data){
-        if(!isValidObjectId(req.params.id)){
-            res.status(400).send("bad request")
+    checkConnected(req, res, async (user) => {
+        if (!isValidObjectId(req.params.id)) {
+            sendError(res, BAD_REQUEST)
             return
         }
         let rdv = await RendezVous.findById(req.params.id)
-        if(!rdv){
-            res.status(404).send("ressource not found")
+        if (!rdv) {
+            sendError(res, RESSOURCE_NOT_FOUND)
+            return
+        }
+        if (data.userId != rdv.owner._id) {
+            sendError(res, UNAUTHORIZED)
             return
         }
 
-        if(data.userId == rdv.owner._id){
-            RendezVous.findByIdAndUpdate({_id: req.params.id}, req.body, {runValidators: true}, (err, rdvUpdated) => {
-                if(err){
-                    console.log(err)
-                    res.status(400).send(err)
-                }
-                else{
-                    res.status(200).json({
-                        rdv: rdvUpdated,
-                        actions: [
-                            { link: `/event/get/${rdv._id}`, method: "get" },
-                            { link: `/event/delete/${rdv._id}`, method: "delete" }
-                        ]
-                    })
-                }
+        RendezVous.findByIdAndUpdate({ _id: req.params.id }, req.body, { runValidators: true }, (err, rdvUpdated) => {
+            if (err) {
+                sendError(res, BAD_REQUEST, err)
+                return
+            }
+
+            res.status(200).json({
+                rdv: rdvUpdated,
+                actions: [
+                    { link: `/event/get/${rdv._id}`, method: "get" },
+                    { link: `/event/delete/${rdv._id}`, method: "delete" }
+                ]
             })
-        }
-        else{
-            res.status(401).send("unauthorized")
-        }
-    }
+        })
+    })
 })
 
 app.delete("/event/delete/:id", async (req, res) => {
-    let data = verifyJwt(req, res)
-    if (data){
-        if(!isValidObjectId(req.params.id)){
-            res.status(400).send("bad request")
+    checkConnected(req, res, async (user) => {
+        if (!isValidObjectId(req.params.id)) {
+            sendError(res, BAD_REQUEST)
             return
         }
         let rdv = await RendezVous.findById(req.params.id)
-        if(!rdv){
-            res.status(404).send("ressource not found")
+        if (!rdv) {
+            sendError(res, RESSOURCE_NOT_FOUND)
             return
         }
-        if(data.userId == rdv.owner._id){
-            await rdv.delete()              //!Attention si changement de la bdd
-            res.status(200).json({
-                actions: [
-                    { link: `/event/create/`, method: "post" }
-                ]
-            })
+        if (!rdv.owner._id.equals(user._id)) {
+            sendError(res, UNAUTHORIZED)
+            return
         }
-        else{
-            res.status(401).send("unauthorized")
-        }
-    }
+
+        await rdv.delete()              //!Attention si changement de la bdd
+        res.status(200).json({
+            actions: [
+                { link: `/event/create/`, method: "post" }
+            ]
+        })
+    })
 })
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 //bind repository for client view
-app.use(express.static("public"));
+app.use(express.static("public"))
 
-app.listen(3000, () => {console.log("serveur lance");})
+app.listen(3000, () => { console.log("serveur lance") })
