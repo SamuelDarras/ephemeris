@@ -10,7 +10,7 @@ function connect() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name:name, password:password})
-    }).then((response) => {
+    }).then(async (response) => {
         if (response.status === 200) {
             window.location.href = "calendar.html"
         }

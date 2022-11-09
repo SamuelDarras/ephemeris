@@ -1,4 +1,4 @@
-import mongoose, { isValidObjectId } from "mongoose"
+import mongoose, { isValidObjectId, now } from "mongoose"
 import express from "express"
 import cors from "cors"
 import bodyParser from "body-parser"
@@ -6,7 +6,7 @@ import env from "dotenv"
 import jwt from "jsonwebtoken"
 import fs from "fs"
 import yaml from "js-yaml"
-
+import cookieParser from 'cookie-parser'
 import swaggerUi from "swagger-ui-express"
 
 import { RendezVous, User } from "./models.js"
@@ -17,10 +17,11 @@ env.config()
 const app = express()
 app.use(cors({
     origin: '*'
-}));
+}))
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(cookieParser())
 
 const swaggerDocument = yaml.load(fs.readFileSync('./swagger.yml', 'utf8'))
 
@@ -31,7 +32,13 @@ function verifyJwt(req, res) {
             return jwt.verify(req.headers.authorization, process.env.JWT_SECRET_KEY)
         } catch (e) {
         }
+    } else if (req.cookies.ephemeris_jwt) {
+        try {
+            return jwt.verify(req.cookies.ephemeris_jwt, process.env.JWT_SECRET_KEY)
+        } catch (e) {
+        }
     }
+
     sendError(res, UNAUTHORIZED)
     return null
 }
@@ -76,6 +83,12 @@ app.post("/connect/", (req, res) => {
             }
             const token = jwt.sign(data, jwtSecretKey)
 
+            let now = new Date();
+            let time = now.getTime();
+            let expireTime = time + 1000*36000;
+            now.setTime(expireTime);
+
+            res.setHeader("Set-Cookie", "ephemeris_jwt="+token + ";expires="+now.toUTCString()+";path=/")
             res.json({
                 user: user.name,
                 token: token
@@ -135,6 +148,34 @@ app.get("/event/get/:id", async (req, res) => {
             sendError(res, UNAUTHORIZED)
         }
 
+    })
+})
+
+app.get("/event/getMonth/:year/:month", async (req, res) => {
+    checkConnected(req, res, async (user) => {
+        if (!req.params.year || !req.params.month) {
+            sendError(res, BAD_REQUEST)
+            return
+        }
+
+        let rdvs = await RendezVous.find({
+            date: {
+                $gte: new Date(req.params.year, req.params.month),
+                $lt: new Date(req.params.year, 1*req.params.month+1)
+            },
+            owner: user
+        })
+        if (!rdvs) {
+            sendError(res, RESSOURCE_NOT_FOUND)
+            return
+        }
+        res.status(200).json({
+            rdvs: rdvs,
+            actions: [
+                // { link: `/event/edit/${rdv._id}`, method: "post" },
+                // { link: `/event/delete/${rdv._id}`, method: "delete" }
+            ]
+        })
     })
 })
 
