@@ -37,6 +37,58 @@
 
     </div>
 
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+        Launch demo modal
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="addRDVLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="addRDVLabel">Ajouter un Rendez-Vous</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body needs-validation" novalidate>
+              <form>
+                <div class="md-6">
+                  <label for="titre" class="form-label">Titre</label>
+                  <input type="text" class="form-control" id="titre" required>
+                  <div class="invalid-feedback">
+                    Veuillez renseigner un titre.
+                  </div>
+                </div>
+
+                <div class="md-6">
+                  <label for="date" class="form-label">Date</label>
+                  <input type="time" class="form-control" id="date" required>
+                  <div class="invalid-feedback">
+                    Veuillez renseigner un horaire
+                  </div>
+                </div>
+
+                <div class="md-6">
+                  <label for="lieux" class="form-label">Lieux</label>
+                  <input type="text" class="form-control" id="lieux">
+                </div>
+
+                <div class="md-6">
+                  <label for="description" class="form-label">Description</label>
+                  <input type="text" class="form-control" id="description">
+                </div>
+
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+              <button class="btn btn-primary" type="submit">Valider</button>
+            
+          </div>
+        </div>
+      </div>
+
+
     <script src="calandar.js"></script>
 
 </body>

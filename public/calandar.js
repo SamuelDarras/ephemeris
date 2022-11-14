@@ -1,3 +1,6 @@
+const modal = new bootstrap.Modal(document.getElementById('myModal'))
+
+
 async function constructCalandar(id) {
     let calandar = document.getElementById(id)
 
@@ -19,6 +22,7 @@ async function constructCalandar(id) {
         })
     }
 
+    dates = dates.sort((a, b) => a.date<b.date)
 
     for (let i = 0; i < 6; i++) {
         let row = calandar.insertRow()
@@ -28,15 +32,16 @@ async function constructCalandar(id) {
             let cell = row.insertCell()
             let div = document.createElement("div")
             cell.appendChild(div)
-            div.onclick = () => handleClickOnDay(curDate.date)
+            div.ondblclick = () => handleClickOnDay(curDate.date)
             div.innerHTML = `\
             ${curDate.date.toDateString().split(' ')[2]}\
             <br>\
             `
 
             for (let rdv of curDate.rdv) {
+                let dateExacte = new Date(rdv.date)
                 div.innerHTML += `\
-                    <button class="btn btn-success">${rdv.title}</button>\
+                    <button class="btn btn-success">${dateExacte.getHours().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}:${dateExacte.getMinutes().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})} - ${rdv.title}</button>\
                     <br>
                     <br>
                 `
@@ -47,7 +52,9 @@ async function constructCalandar(id) {
 }
 
 function handleClickOnDay(date) {
-    alert(date)
+    modal.show()
+    
 }
 
 constructCalandar("calandar")
+
