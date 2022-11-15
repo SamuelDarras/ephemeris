@@ -160,8 +160,8 @@ app.get("/event/getMonth/:year/:month", async (req, res) => {
 
         let rdvs = await RendezVous.find({
             date: {
-                $gte: new Date(req.params.year, req.params.month),
-                $lt: new Date(req.params.year, 1*req.params.month+1)
+                $gte: new Date(req.params.year, 1*req.params.month-1, 1),
+                $lt: new Date(req.params.year, 1*req.params.month, 1)
             },
             owner: user
         })

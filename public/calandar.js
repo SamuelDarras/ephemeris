@@ -7,17 +7,18 @@ document.getElementById('myModal').addEventListener("hidden.bs.modal", () => doc
 async function constructCalandar(id) {
     let calandar = document.getElementById(id)
 
-    let now = new Date("10/10/2022")
+    let now = new Date(Date.now())
     let offsetMonth = new Date(now.getFullYear(), now.getMonth()).getDay()
 
 
-    let res = await fetch(`/event/getMonth/${now.getFullYear()}/${now.getDate()}`, {
+    let res = await fetch(`/event/getMonth/${now.getFullYear()}/${now.getMonth()+1}`, {
         credentials: 'same-origin'
     })
     res = await res.json()
+    console.log(res)
     let dates = []
     for (let i = 0; i < 42; i++) {
-        let curDate = new Date(now.getFullYear(), now.getMonth() + 1, i - offsetMonth + 2)
+        let curDate = new Date(now.getFullYear(), now.getMonth(), i - offsetMonth + 2)
         let rdvs = res.rdvs.filter((v) => new Date(v.date).toDateString() == curDate.toDateString())
         dates.push({
             date: curDate,
@@ -61,7 +62,7 @@ async function constructCalandar(id) {
 
 function handleClickOnDay(date) {
     modal.show()
-    modalDay.value = [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-');
+    modalDay.value = [date.getFullYear(), date.getMonth(), date.getDate()].join('-');
 }
 
 function formValidate() {
