@@ -28,9 +28,9 @@ async function constructCalandar(id) {
             let curDate = dates[i * 7 + j]
 
             let cell = row.insertCell()
+            cell.ondblclick = () => handleClickOnDay(curDate.date)
             let div = document.createElement("div")
             cell.appendChild(div)
-            div.ondblclick = () => handleClickOnDay(curDate.date)
             div.innerHTML = `\
             ${curDate.date.toDateString().split(' ')[2]}\
             <br>\
