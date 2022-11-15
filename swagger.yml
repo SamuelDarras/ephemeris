@@ -6,6 +6,25 @@ servers:
   - url: localhost:3000
 
 paths:
+  /connect:
+    post:
+      summary: Se connecter à l'application
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                password:
+                  type: string
+              required:
+                - name
+                - password
+      responses:
+        '200':
+          description: la connexion est réussie
   /event/create:
     post:
       summary: Créé un nouveau RendezVous
@@ -60,3 +79,114 @@ paths:
                           type: string
                         method: 
                           type: string
+  /event/get/{id}:
+    get:
+      summary: Trouver un événement
+      responses:
+        '400':
+          description: id invalide
+        '404':
+          description: aucun événement possédant cet id trouvé
+        '200':    # status code
+          description: un événement a été trouvé
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  rdv:
+                    type: object
+                    properties:
+                      title: 
+                        type: string
+                      date: 
+                        type: string
+                      place: 
+                        type: string
+                      description: 
+                        type: string
+                      owner: 
+                        type: string
+                      _id:
+                        type: string
+                      __v: 
+                        type: integer
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        link:
+                          type: string
+                        method: 
+                          type: string
+  /event/edit/{id}:
+    post:
+      summary: TODO
+  /event/delete/{id}:
+    delete:
+      summary: Supprimer un événement
+      responses:
+        '400':
+          description: id invalide
+        '404':
+          description: aucun événement possédant cet id trouvé
+        '200':    # status code
+          description: un événement a été trouvé et supprimé
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        link:
+                          type: string
+                        method: 
+                          type: string
+  /event/getMonth/{year}/{month}:
+    get:
+      summary: Trouver tous les événements pour un mois d'une année donnée
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                year:
+                  type: string
+                month: 
+                  type: string
+              required:
+                - year
+                - month
+      responses:
+        '404':
+          description: Aucun événement trouvé
+        '200':    # status code
+          description: des objet événement
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  rdv:
+                    type: object
+                    properties:
+                      title: 
+                        type: string
+                      date: 
+                        type: string
+                      place: 
+                        type: string
+                      description: 
+                        type: string
+                      owner: 
+                        type: string
+                      _id:
+                        type: string
+                      __v: 
+                        type: integer

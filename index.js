@@ -171,10 +171,7 @@ app.get("/event/getMonth/:year/:month", async (req, res) => {
         }
         res.status(200).json({
             rdvs: rdvs,
-            actions: [
-                // { link: `/event/edit/${rdv._id}`, method: "post" },
-                // { link: `/event/delete/${rdv._id}`, method: "delete" }
-            ]
+            actions: []
         })
     })
 })
