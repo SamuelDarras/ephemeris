@@ -37,7 +37,7 @@
             </div>
             <div class="mb-3">
             <label for="passwordInput" class="form-label">Mot de passe</label>
-            <input type="password" class="form-control" id="passwordInput">
+            <input type="password" onkeydown="console.log(event.keyCode); if (event.keyCode == 13) connect()" class="form-control" id="passwordInput">
             </div>
             <button onclick="connect()" type="button" class="btn btn-primary">Submit</button>
         </form>

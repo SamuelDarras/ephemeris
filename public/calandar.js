@@ -8,21 +8,19 @@ async function constructCalandar(id) {
     let offsetMonth = new Date(now.getFullYear(), now.getMonth()).getDay()
 
 
-    let rdvs = await fetch(`/event/getMonth/${now.getFullYear()}/${now.getDate()}`, {
+    let res = await fetch(`/event/getMonth/${now.getFullYear()}/${now.getDate()}`, {
         credentials: 'same-origin'
     })
-    rdvs = await rdvs.json()
+    res = await res.json()
     let dates = []
     for (let i = 0; i < 42; i++) {
         let curDate = new Date(now.getFullYear(), now.getMonth() + 1, i - offsetMonth + 2)
-        let rdv = rdvs.rdvs.filter((v) => new Date(v.date).toDateString() == curDate.toDateString())
+        let rdvs = res.rdvs.filter((v) => new Date(v.date).toDateString() == curDate.toDateString())
         dates.push({
             date: curDate,
-            rdv: rdv
+            rdvs: rdvs
         })
     }
-
-    dates = dates.sort((a, b) => a.date<b.date)
 
     for (let i = 0; i < 6; i++) {
         let row = calandar.insertRow()
@@ -38,10 +36,18 @@ async function constructCalandar(id) {
             <br>\
             `
 
-            for (let rdv of curDate.rdv) {
+            for (let rdv of curDate.rdvs.sort((rdvA, rdvB) => {
+                if (new Date(rdvA.date).getTime() > new Date(rdvB.date).getTime()) {
+                    return 1
+                } else if (new Date(rdvA.date).getTime() < new Date(rdvB.date).getTime()) {
+                    return -1
+                } else {
+                    return 0
+                }
+            })) {
                 let dateExacte = new Date(rdv.date)
                 div.innerHTML += `\
-                    <button class="btn btn-success">${dateExacte.getHours().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})}:${dateExacte.getMinutes().toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})} - ${rdv.title}</button>\
+                    <button class="btn btn-success">${dateExacte.getHours().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}:${dateExacte.getMinutes().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} - ${rdv.title}</button>\
                     <br>
                     <br>
                 `
@@ -53,7 +59,7 @@ async function constructCalandar(id) {
 
 function handleClickOnDay(date) {
     modal.show()
-    
+
 }
 
 constructCalandar("calandar")
