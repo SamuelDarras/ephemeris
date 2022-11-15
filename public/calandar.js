@@ -1,5 +1,5 @@
 const modal = new bootstrap.Modal(document.getElementById('myModal'))
-const modalDay = document.getElementById("modalDay");
+const modalDay = document.getElementById("modalDay")
 
 document.getElementById('myModal').addEventListener("hidden.bs.modal", () => document.getElementById("modalForm").reset())
 
@@ -11,11 +11,10 @@ async function constructCalandar(id) {
     let offsetMonth = new Date(now.getFullYear(), now.getMonth()).getDay()
 
 
-    let res = await fetch(`/event/getMonth/${now.getFullYear()}/${now.getMonth()+1}`, {
+    let res = await fetch(`/event/getMonth/${now.getFullYear()}/${now.getMonth() + 1}`, {
         credentials: 'same-origin'
     })
     res = await res.json()
-    console.log(res)
     let dates = []
     for (let i = 0; i < 42; i++) {
         let curDate = new Date(now.getFullYear(), now.getMonth(), i - offsetMonth + 2)
@@ -34,6 +33,7 @@ async function constructCalandar(id) {
             let cell = row.insertCell()
             cell.ondblclick = () => handleClickOnDay(curDate.date)
             let div = document.createElement("div")
+            div.classList.add("calendarCell")
             cell.appendChild(div)
             div.innerHTML = `\
             ${curDate.date.toDateString().split(' ')[2]}\
@@ -51,9 +51,7 @@ async function constructCalandar(id) {
             })) {
                 let dateExacte = new Date(rdv.date)
                 div.innerHTML += `\
-                    <button class="btn btn-success">${dateExacte.getHours().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}:${dateExacte.getMinutes().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} - ${rdv.title}</button>\
-                    <br>
-                    <br>
+                    <p class="rendez-vous">${dateExacte.getHours().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}:${dateExacte.getMinutes().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} - ${rdv.title}</p>\
                 `
             }
         }
@@ -62,17 +60,21 @@ async function constructCalandar(id) {
 
 function handleClickOnDay(date) {
     modal.show()
-    modalDay.value = [date.getFullYear(), date.getMonth(), date.getDate()].join('-');
+    console.log("" + date.getDate())
+    modalDay.value = [date.getFullYear(),
+        ("" + (date.getMonth()+1)).length == 2 ? "" + (date.getMonth()+1) : "0" + (date.getMonth()+1),
+        ("" + date.getDate()).length == 2 ? "" + date.getDate() : "0" + date.getDate()
+    ].join('-')
 }
 
 function formValidate() {
-    let titre = document.getElementById("titre");
-    let heure = document.getElementById("date");
+    let titre = document.getElementById("titre")
+    let heure = document.getElementById("date")
 
-    let errorTitre = document.getElementById("titreError");
-    let errorHeure = document.getElementById("heureError");
+    let errorTitre = document.getElementById("titreError")
+    let errorHeure = document.getElementById("heureError")
 
-    let error = 0;
+    let error = 0
 
     if (titre.value.length == 0) {
         errorTitre.innerHTML = "Le titre ne doit pas être vide"
@@ -80,7 +82,7 @@ function formValidate() {
         error += 1
     }
     else {
-        errorTitre.classList.add("d-none");
+        errorTitre.classList.add("d-none")
     }
 
     if (heure.value.length == 0) {
@@ -89,7 +91,7 @@ function formValidate() {
         error += 1
     }
     else {
-        errorHeure.classList.add("d-none");
+        errorHeure.classList.add("d-none")
     }
 
     if (!error) {
@@ -102,11 +104,11 @@ function formValidate() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ title: titre.value, date: date, place: document.getElementById("lieux").value, description: document.getElementById("description").value})
+            body: JSON.stringify({ title: titre.value, date: date, place: document.getElementById("lieux").value, description: document.getElementById("description").value })
         }).then(modal.hide())
     }
 
 }
 
-constructCalandar("calandar")
+constructCalandar("calendar")
 

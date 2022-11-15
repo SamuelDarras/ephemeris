@@ -1,0 +1,35 @@
+:root {
+    --paradise-pink: #ef476fff;
+    --orange-yellow-crayola: #ffd166ff;
+    --caribbean-green: #06d6a0ff;
+    --blue-ncs: #118ab2ff;
+    --midnight-green-eagle-green: #073b4cff;
+    --rdv-bg: var(--caribbean-green);
+    --rdv-fg: var(--midnight-green-eagle-green);
+}
+
+.calendarCell {
+    height: 10em;
+    max-height: 10em;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.rendez-vous {
+    justify-content: left;
+    padding: .2em;
+    padding-left: .5em;
+    border-radius: .4em;
+    margin-bottom: .1em;
+    color: var(--rdv-fg);
+    background-color: var(--rdv-bg);
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+table {
+    table-layout: fixed;
+    height: 100%;
+}
