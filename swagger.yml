@@ -5,9 +5,13 @@ info:
 servers:
   - url: localhost:3000
 
+tags:
+  - name: Rendez-vous
 paths:
   /connect:
     post:
+      tags:
+        - Rendez-vous
       summary: Se connecter à l'application
       requestBody:
         content:
@@ -27,21 +31,14 @@ paths:
           description: la connexion est réussie
   /event/create:
     post:
+      tags:
+        - Rendez-vous
       summary: Créé un nouveau RendezVous
       requestBody:
         content: 
           application/json:
             schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                date: 
-                  type: string
-                place: 
-                  type: string
-                description:
-                  type: string
+              $ref: '#/components/schemas/RendezVous'
               required:
                 - title
                 - date
@@ -81,6 +78,8 @@ paths:
                           type: string
   /event/get/{id}:
     get:
+      tags:
+        - Rendez-vous
       summary: Trouver un événement
       responses:
         '400':
@@ -122,9 +121,61 @@ paths:
                           type: string
   /event/edit/{id}:
     post:
-      summary: TODO
+      tags:
+        - Rendez-vous
+      summary: Modifier un événement
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                _: 
+                  type: object
+      responses:
+        '400':
+          description: Requête invalide
+        '404':
+          description: Aucun événement possédant cet id trouvé
+        '401':
+          description: Il faut être connecté pour utiliser cette fonctionnalitée
+        '200':    # status code
+          description: un objet RendezVous et les actions possibles
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  rdv:
+                    type: object
+                    properties:
+                      title: 
+                        type: string
+                      date: 
+                        type: string
+                      place: 
+                        type: string
+                      description: 
+                        type: string
+                      owner: 
+                        type: string
+                      _id:
+                        type: string
+                      __v: 
+                        type: integer
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        link:
+                          type: string
+                        method: 
+                          type: string
   /event/delete/{id}:
     delete:
+      tags:
+        - Rendez-vous
       summary: Supprimer un événement
       responses:
         '400':
@@ -149,6 +200,8 @@ paths:
                           type: string
   /event/getMonth/{year}/{month}:
     get:
+      tags:
+        - Rendez-vous
       summary: Trouver tous les événements pour un mois d'une année donnée
       requestBody:
         content: 
@@ -190,3 +243,16 @@ paths:
                         type: string
                       __v: 
                         type: integer
+
+components:
+  schemas:
+    RendezVous:
+      properties:
+        title:
+          type: string
+        date:
+          type: date
+        place:
+          type: string
+        description:
+          type: string
