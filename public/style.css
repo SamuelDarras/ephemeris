@@ -8,11 +8,12 @@
     --rdv-fg: var(--midnight-green-eagle-green);
 }
 
-.calendarCell {
-    height: 10em;
-    max-height: 10em;
-    overflow-y: scroll;
+.calendar-cell {
+    height: 8em;
+    max-height: 8em;
+    overflow-y: auto;
     overflow-x: hidden;
+    border: 1px solid black;
 }
 
 .rendez-vous {
@@ -29,7 +30,15 @@
     text-overflow: ellipsis;
 }
 
-table {
-    table-layout: fixed;
-    height: 100%;
+#calendar {
+    margin: 1em;
+}
+
+.main {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
 }

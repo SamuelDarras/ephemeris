@@ -20,76 +20,75 @@
   <link rel="icon" href="logo-ico.svg">
 </head>
 
-<body style="background-color: #c7c7c7;">
-  <div class="container" style="background-color: white;">
-    <table id="calendarHead" class="table table-bordered">
-      <thead>
-        <tr>
-          <th style="width: 10em;">Lundi</th>
-          <th style="width: 10em;">Mardi</th>
-          <th style="width: 10em;">Mercredi</th>
-          <th style="width: 10em;">Jeudi</th>
-          <th style="width: 10em;">Vendredi</th>
-          <th style="width: 10em;">Samedi</th>
-          <th style="width: 10em;">Dimanche</th>
-        </tr>
-      </thead>
-      <tbody id="calendar">
-      </tbody>
-    </table>
-
-  </div>
-
-  <!-- Button trigger modal -->
-  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
-    Launch demo modal
-  </button>
-
-  <!-- Modal -->
-  <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="addRDVLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="addRDVLabel">Ajouter un rendez-vous le </h1>
-          <input class="mw-10 ms-2" type="date" class="form-control" id="modalDay">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body needs-validation" novalidate>
-          <form id="modalForm">
-            <div class="md-6">
-              <label for="titre" class="form-label">Titre</label>
-              <input type="text" class="form-control" id="titre" required>
-              <label id="titreError" style="color:red;font-size: small;" class="d-none"></label>
-            </div>
-
-            <div class="md-6">
-              <label for="date" class="form-label">Heure</label>
-              <input type="time" class="form-control" id="date" required>
-              <label id="heureError" style="color:red;font-size: small;" class="d-none"></label>
-
-            </div>
-
-            <div class="md-6">
-              <label for="lieux" class="form-label">Lieux</label>
-              <input type="text" class="form-control" id="lieux">
-            </div>
-
-            <div class="md-6">
-              <label for="description" class="form-label">Description</label>
-              <input type="text" class="form-control" id="description">
-            </div>
-
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-          <button class="btn btn-success" type="submit" onclick="formValidate()">Valider</button>
+<body>
+  <div class="d-flex flex-row justify-content-between">
+    <div class="p-2 bd-highlight">
+      <div id="controls" class="">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+          Launch demo modal
+        </button>
+      </div>
+    </div>
+    <div class="p-2 flex-grow-1">
+      <div id="calendar" class="">
+        <div class="row">
+          <div class="col">Lundi</div>
+          <div class="col">Mardi</div>
+          <div class="col">Mercredi</div>
+          <div class="col">Jeudi</div>
+          <div class="col">Vendredi</div>
+          <div class="col">Samedi</div>
+          <div class="col">Dimanche</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <script src="calandar.js"></script>
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="addRDVLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="addRDVLabel">Ajouter un rendez-vous le </h1>
+            <input class="mw-10 ms-2" type="date" class="form-control" id="modalDay">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body needs-validation" novalidate>
+            <form id="modalForm">
+              <div class="md-6">
+                <label for="titre" class="form-label">Titre</label>
+                <input type="text" class="form-control" id="titre" required>
+                <label id="titreError" style="color:red;font-size: small;" class="d-none"></label>
+              </div>
 
+              <div class="md-6">
+                <label for="date" class="form-label">Heure</label>
+                <input type="time" class="form-control" id="date" required>
+                <label id="heureError" style="color:red;font-size: small;" class="d-none"></label>
+
+              </div>
+
+              <div class="md-6">
+                <label for="lieux" class="form-label">Lieux</label>
+                <input type="text" class="form-control" id="lieux">
+              </div>
+
+              <div class="md-6">
+                <label for="description" class="form-label">Description</label>
+                <input type="text" class="form-control" id="description">
+              </div>
+
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            <button class="btn btn-success" type="submit" onclick="formValidate()">Valider</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="calandar.js"></script>
 </body>
 
 </html>
