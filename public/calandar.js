@@ -11,7 +11,7 @@ async function constructCalandar(id) {
     let offsetMonth = new Date(now.getFullYear(), now.getMonth()).getDay()
 
 
-    let res = await fetch(`/event/getMonth/${now.getFullYear()}/${now.getMonth() + 1}`, {
+    let res = await fetch(`/event/get-month/${now.getFullYear()}/${now.getMonth() + 1}`, {
         credentials: 'same-origin'
     })
     res = await res.json()
@@ -26,14 +26,20 @@ async function constructCalandar(id) {
     }
 
     for (let i = 0; i < 6; i++) {
-        let row = calandar.insertRow()
+        let row = document.createElement("div")
+        row.classList.add("row")
+        row.classList.add("calendar-row")
+        calandar.appendChild(row)
         for (let j = 0; j < 7; j++) {
             let curDate = dates[i * 7 + j]
 
-            let cell = row.insertCell()
+            let cell = document.createElement("div")
+            cell.classList.add("col")
+            cell.classList.add("calendar-cell")
+
+            row.appendChild(cell)
             cell.ondblclick = () => handleClickOnDay(curDate.date)
             let div = document.createElement("div")
-            div.classList.add("calendarCell")
             cell.appendChild(div)
             div.innerHTML = `\
             ${curDate.date.toDateString().split(' ')[2]}\

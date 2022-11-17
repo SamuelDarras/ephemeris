@@ -91,7 +91,10 @@ app.post("/connect/", (req, res) => {
             res.setHeader("Set-Cookie", "ephemeris_jwt="+token + ";expires="+now.toUTCString()+";path=/")
             res.json({
                 user: user.name,
-                token: token
+                token: token,
+                actions: [
+                    { link: `/event/create`, method: "post" },
+                ]
             })
         }
     })
@@ -151,7 +154,7 @@ app.get("/event/get/:id", async (req, res) => {
     })
 })
 
-app.get("/event/getMonth/:year/:month", async (req, res) => {
+app.get("/event/get-month/:year/:month", async (req, res) => {
     checkConnected(req, res, async (user) => {
         if (!req.params.year || !req.params.month) {
             sendError(res, BAD_REQUEST)
@@ -171,10 +174,12 @@ app.get("/event/getMonth/:year/:month", async (req, res) => {
         }
         res.status(200).json({
             rdvs: rdvs,
-            actions: [
-                // { link: `/event/edit/${rdv._id}`, method: "post" },
-                // { link: `/event/delete/${rdv._id}`, method: "delete" }
-            ]
+            actions: rdvs.map(rdv => {
+                return [
+                    { link: `/event/edit/${rdv._id}`, method: "post" },
+                    { link: `/event/delete/${rdv._id}`, method: "delete" }
+                ]
+            })
         })
     })
 })
@@ -190,12 +195,12 @@ app.post("/event/edit/:id", async (req, res) => {
             sendError(res, RESSOURCE_NOT_FOUND)
             return
         }
-        if (data.userId != rdv.owner._id) {
+        if (!user._id.equals(rdv.owner._id)) {
             sendError(res, UNAUTHORIZED)
             return
         }
 
-        RendezVous.findByIdAndUpdate({ _id: req.params.id }, req.body, { runValidators: true }, (err, rdvUpdated) => {
+        RendezVous.findByIdAndUpdate({ _id: req.params.id }, {$set: req.body}, { runValidators: true }, (err, rdvUpdated) => {
             if (err) {
                 sendError(res, BAD_REQUEST, err)
                 return
