@@ -24,8 +24,9 @@
   <div class="d-flex flex-row justify-content-between">
     <div class="p-2 bd-highlight">
       <div id="controls" class="">
-        <button type="button" class="btn" style="background-color: #70e000;" onclick="handleClickOnDay(event, new Date())">
-          <img src="https://img.icons8.com/ios-filled/25/null/plus-math.png"/>
+        <button type="button" class="btn" style="background-color: #70e000;"
+          onclick="handleClickOnDay(event, new Date())">
+          <img src="https://img.icons8.com/ios-filled/25/null/plus-math.png" />
         </button>
       </div>
     </div>
@@ -44,49 +45,59 @@
     </div>
   </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="addRDVLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="addRDVLabel">Ajouter un rendez-vous le </h1>
-            <input class="mw-10 ms-2" type="date" class="form-control" id="modalDay">
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body needs-validation" novalidate>
-            <form id="modalForm">
-              <div class="md-6">
-                <label for="titre" class="form-label">Titre</label>
-                <input type="text" class="form-control" id="titre" required>
-                <label id="titreError" style="color:red;font-size: small;" class="d-none"></label>
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="addRDVLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="addRDVLabel">Ajouter un rendez-vous le </h1>
+          <input class="mw-10 ms-2" type="date" class="form-control" id="modalDay">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body needs-validation" novalidate>
+          <form id="modalForm">
+            <div class="md-6">
+              <label for="titre" class="form-label">Titre</label>
+              <input type="text" class="form-control" id="titre" required>
+              <label id="titreError" style="color:red;font-size: small;" class="d-none"></label>
+            </div>
+
+            <div class="md-6">
+              <label for="date" class="form-label">Heure</label>
+              <input type="time" class="form-control" id="date" required>
+              <label id="heureError" style="color:red;font-size: small;" class="d-none"></label>
+            </div>
+
+            <label for="">Date de fin</label>
+            <div class="input-group">
+              <div class="input-group-text">
+                <input type="checkbox" id="checkboxFin" class="form-check-input" onchange="document.getElementById('timeFin').disabled = !this.checked; document.getElementById('dateFin').disabled = !this.checked;">
               </div>
+              <input type="date" class="form-control" disabled name="" id="dateFin">
+              <input type="time" class="form-control" disabled name="" id="timeFin">
+            </div>
+            <label id="dateFinError" style="color:red;font-size: small;" class="d-none"></label>
 
-              <div class="md-6">
-                <label for="date" class="form-label">Heure</label>
-                <input type="time" class="form-control" id="date" required>
-                <label id="heureError" style="color:red;font-size: small;" class="d-none"></label>
+            <div class="md-6">
+              <label for="lieux" class="form-label">Lieux</label>
+              <input type="text" class="form-control" id="lieux">
+            </div>
 
-              </div>
+            <div class="md-6">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" id="description"></textarea>
+            </div>
 
-              <div class="md-6">
-                <label for="lieux" class="form-label">Lieux</label>
-                <input type="text" class="form-control" id="lieux">
-              </div>
-
-              <div class="md-6">
-                <label for="description" class="form-label">Description</label>
-                <input type="text" class="form-control" id="description">
-              </div>
-
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            <button class="btn btn-success" type="submit" id="modalValider">Valider</button>
-          </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="modalSupprimer">Supprimer</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+          <button class="btn btn-success" type="submit" id="modalValider">Valider</button>
         </div>
       </div>
     </div>
+  </div>
   </div>
   <script src="calandar.js"></script>
 </body>
