@@ -24,14 +24,14 @@
   <div class="d-flex flex-row justify-content-between">
     <div class="p-2 bd-highlight">
       <div id="controls" class="">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
-          Launch demo modal
+        <button type="button" class="btn" style="background-color: #70e000;" onclick="handleClickOnDay(event, new Date())">
+          <img src="https://img.icons8.com/ios-filled/25/null/plus-math.png"/>
         </button>
       </div>
     </div>
-    <div class="p-2 flex-grow-1">
-      <div id="calendar" class="">
-        <div class="row">
+    <div id="calendar-container" class="p-2 flex-grow-1">
+      <div id="calendar">
+        <div class="row calendar-header">
           <div class="col">Lundi</div>
           <div class="col">Mardi</div>
           <div class="col">Mercredi</div>
@@ -82,7 +82,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            <button class="btn btn-success" type="submit" onclick="formValidate()">Valider</button>
+            <button class="btn btn-success" type="submit" id="modalValider">Valider</button>
           </div>
         </div>
       </div>

@@ -1,8 +1,13 @@
 const modal = new bootstrap.Modal(document.getElementById('myModal'))
 const modalDay = document.getElementById("modalDay")
+const titre = document.getElementById("titre")
+const heure = document.getElementById("date")
+const lieux = document.getElementById("lieux")
+const description = document.getElementById("description")
 
 document.getElementById('myModal').addEventListener("hidden.bs.modal", () => document.getElementById("modalForm").reset())
 
+let mapRdvs = {}
 
 async function constructCalandar(id) {
     let calandar = document.getElementById(id)
@@ -18,7 +23,10 @@ async function constructCalandar(id) {
     let dates = []
     for (let i = 0; i < 42; i++) {
         let curDate = new Date(now.getFullYear(), now.getMonth(), i - offsetMonth + 2)
-        let rdvs = res.rdvs.filter((v) => new Date(v.date).toDateString() == curDate.toDateString())
+        let rdvs = res.rdvs.filter((v) => {
+            mapRdvs[v._id] = v
+            return new Date(v.date).toDateString() == curDate.toDateString()
+        })
         dates.push({
             date: curDate,
             rdvs: rdvs
@@ -38,7 +46,7 @@ async function constructCalandar(id) {
             cell.classList.add("calendar-cell")
 
             row.appendChild(cell)
-            cell.ondblclick = () => handleClickOnDay(curDate.date)
+            cell.onclick = (event) => handleClickOnDay(event, curDate.date)
             let div = document.createElement("div")
             cell.appendChild(div)
             div.innerHTML = `\
@@ -57,26 +65,76 @@ async function constructCalandar(id) {
             })) {
                 let dateExacte = new Date(rdv.date)
                 div.innerHTML += `\
-                    <p class="rendez-vous">${dateExacte.getHours().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}:${dateExacte.getMinutes().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} - ${rdv.title}</p>\
+                    <p class="rendez-vous" onclick="handleClickOnRendezVous(event, '${rdv._id}')">${dateExacte.getHours().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}:${dateExacte.getMinutes().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} - ${rdv.title}</p>\
                 `
             }
         }
     }
 }
 
-function handleClickOnDay(date) {
-    modal.show()
-    console.log("" + date.getDate())
+function handleClickOnDay(event, date) {
+    document.getElementById("addRDVLabel").innerHTML = "Ajouter un rendez-vous le"
     modalDay.value = [date.getFullYear(),
         ("" + (date.getMonth()+1)).length == 2 ? "" + (date.getMonth()+1) : "0" + (date.getMonth()+1),
         ("" + date.getDate()).length == 2 ? "" + date.getDate() : "0" + date.getDate()
     ].join('-')
+
+    document.getElementById("modalValider").onclick = () => {
+        if (formValidate()) {
+            let date = new Date(modalDay.value)
+            date.setHours(...heure.value.split(":"))
+
+            fetch("/event/create/", {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: titre.value, date: date, place: lieux.value, description: description.value })
+            }).then(modal.hide())
+        }
+    }
+
+    modal.show()
+}
+
+function handleClickOnRendezVous(event, rdvId) {
+    event.stopPropagation()
+    document.getElementById("addRDVLabel").innerHTML = "Rendez-vous le"
+
+    let rdv = mapRdvs[rdvId]
+    let date = new Date(rdv.date)
+
+    titre.value = rdv.title
+    heure.value = "" + (""+date.getHours()).padStart(2, "0") + ":" + (""+date.getMinutes()).padStart(2, "0")
+    lieux.value = rdv.place
+    description.value = rdv.description
+
+    modalDay.value = [date.getFullYear(),
+        ("" + (date.getMonth()+1)).padStart(2, "0"),
+        ("" + (date.getDate())).padStart(2, "0"),
+    ].join('-')
+
+    document.getElementById("modalValider").onclick = () => {
+        if (formValidate()) {
+            let date = new Date(modalDay.value)
+            date.setHours(...heure.value.split(":"))
+
+            fetch("/event/edit/"+rdv._id, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: titre.value, date: date, place: lieux.value, description: description.value })
+            }).then(modal.hide())
+        }
+    }
+    
+    modal.show()
 }
 
 function formValidate() {
-    let titre = document.getElementById("titre")
-    let heure = document.getElementById("date")
-
     let errorTitre = document.getElementById("titreError")
     let errorHeure = document.getElementById("heureError")
 
@@ -100,20 +158,7 @@ function formValidate() {
         errorHeure.classList.add("d-none")
     }
 
-    if (!error) {
-        let date = new Date(modalDay.value)
-        date.setHours(...heure.value.split(":"))
-
-        fetch("/event/create/", {
-            method: "POST",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ title: titre.value, date: date, place: document.getElementById("lieux").value, description: document.getElementById("description").value })
-        }).then(modal.hide())
-    }
-
+    return error == 0
 }
 
 constructCalandar("calendar")

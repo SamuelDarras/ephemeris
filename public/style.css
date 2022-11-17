@@ -3,9 +3,15 @@
     --orange-yellow-crayola: #ffd166ff;
     --caribbean-green: #06d6a0ff;
     --blue-ncs: #118ab2ff;
+    --lavender-grey: #c1b8c8;
     --midnight-green-eagle-green: #073b4cff;
     --rdv-bg: var(--caribbean-green);
     --rdv-fg: var(--midnight-green-eagle-green);
+    --bg: var(--lavender-grey);
+}
+
+body {
+    background-color: var(--bg);
 }
 
 .calendar-cell {
@@ -14,6 +20,11 @@
     overflow-y: auto;
     overflow-x: hidden;
     border: 1px solid black;
+    background-color: white;
+}
+
+.calendar-header {
+    background-color: var(--caribbean-green);
 }
 
 .rendez-vous {
@@ -28,10 +39,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-#calendar {
-    margin: 1em;
 }
 
 .main {
