@@ -21,14 +21,17 @@ paths:
               properties:
                 name:
                   type: string
+                  example: toto
                 password:
                   type: string
+                  example: totodu70
               required:
                 - name
                 - password
+      required: true
       responses:
         '200':
-          description: la connexion est réussie
+          description: La connexion est réussie
   /event/create:
     post:
       tags:
@@ -39,11 +42,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RendezVous'
-              required:
-                - title
-                - date
+        required: true
       responses:
-        '200':    # status code
+        '200':
           description: un objet RendezVous et les actions possibles
           content:
             application/json:
@@ -51,198 +52,169 @@ paths:
                 type: object
                 properties:
                   rdv:
-                    type: object
-                    properties:
-                      title: 
-                        type: string
-                      date: 
-                        type: string
-                      place: 
-                        type: string
-                      description: 
-                        type: string
-                      owner: 
-                        type: string
-                      _id:
-                        type: string
-                      __v: 
-                        type: integer
+                    $ref: '#/components/schemas/CompleteRendezVous'
                   actions:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        link:
-                          type: string
-                        method: 
-                          type: string
+                      $ref: '#/components/schemas/Actions'
+        '400':
+          description: format des données invalide
+                      
   /event/get/{id}:
     get:
       tags:
         - Rendez-vous
       summary: Trouver un événement
+      parameters:
+        - name: id
+          in: path
+          description: ID de l'événement à trouver
+          required: true
+          schema:
+            type: integer
+            example: '637740df4a124e6e61459d92'
       responses:
         '400':
-          description: id invalide
-        '404':
-          description: aucun événement possédant cet id trouvé
-        '200':    # status code
-          description: un événement a été trouvé
-          content:
-            application/json:
-              schema: 
-                type: object
-                properties:
-                  rdv:
-                    type: object
-                    properties:
-                      title: 
-                        type: string
-                      date: 
-                        type: string
-                      place: 
-                        type: string
-                      description: 
-                        type: string
-                      owner: 
-                        type: string
-                      _id:
-                        type: string
-                      __v: 
-                        type: integer
-                  actions:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        link:
-                          type: string
-                        method: 
-                          type: string
-  /event/edit/{id}:
-    post:
-      tags:
-        - Rendez-vous
-      summary: Modifier un événement
-      requestBody:
-        content: 
-          application/json:
-            schema:
-              type: object
-              properties:
-                _: 
-                  type: object
-      responses:
-        '400':
-          description: Requête invalide
+          description: Format de l'id invalide
         '404':
           description: Aucun événement possédant cet id trouvé
-        '401':
-          description: Il faut être connecté pour utiliser cette fonctionnalitée
-        '200':    # status code
-          description: un objet RendezVous et les actions possibles
+        '200':
+          description: Un événement a été trouvé
           content:
             application/json:
               schema: 
                 type: object
                 properties:
                   rdv:
-                    type: object
-                    properties:
-                      title: 
-                        type: string
-                      date: 
-                        type: string
-                      place: 
-                        type: string
-                      description: 
-                        type: string
-                      owner: 
-                        type: string
-                      _id:
-                        type: string
-                      __v: 
-                        type: integer
+                    $ref: '#/components/schemas/CompleteRendezVous'
                   actions:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        link:
-                          type: string
-                        method: 
-                          type: string
-  /event/delete/{id}:
-    delete:
-      tags:
-        - Rendez-vous
-      summary: Supprimer un événement
-      responses:
-        '400':
-          description: id invalide
-        '404':
-          description: aucun événement possédant cet id trouvé
-        '200':    # status code
-          description: un événement a été trouvé et supprimé
-          content:
-            application/json:
-              schema: 
-                type: object
-                properties:
-                  actions:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        link:
-                          type: string
-                        method: 
-                          type: string
-  /event/getMonth/{year}/{month}:
+                      $ref: '#/components/schemas/Actions'
+                      
+  /event/get-month/{year}/{month}:
     get:
       tags:
         - Rendez-vous
       summary: Trouver tous les événements pour un mois d'une année donnée
-      requestBody:
-        content: 
-          application/json:
-            schema:
-              type: object
-              properties:
-                year:
-                  type: string
-                month: 
-                  type: string
-              required:
-                - year
-                - month
+      parameters:
+        - name: year
+          in: path
+          description: Année de l'événement à trouver
+          required: true
+          schema:
+            type: integer
+            example: 2022
+        - name: month
+          in: path
+          description: Mois de l'événement à trouver
+          required: true
+          schema:
+            type: integer
+            example: 11
       responses:
+        '400':
+          description: Format de l'année ou du mois invalides
         '404':
-          description: Aucun événement trouvé
-        '200':    # status code
+          description: Aucun événement trouvé pour cette année et ce mois
+        '200':
           description: des objet événement
           content:
             application/json:
               schema: 
                 type: object
                 properties:
+                  rdvs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompleteRendezVous'
+                  actions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Actions'
+                      
+  /event/edit/{id}:
+    post:
+      tags:
+        - Rendez-vous
+      summary: Modifier un événement
+      description: Le corps de la requête peut être composé de tous les champs présent dans un RendezVous
+      parameters:
+        - name: id
+          in: path
+          description: ID de l'événement à modifier
+          required: true
+          schema:
+            type: integer
+            example: '637740df4a124e6e61459d92'
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: 
+                  type: string
+                  example: "modification title"
+                description:
+                  type: string
+                  example: "a better description"
+      responses:
+        '400':
+          description: Format de l'id invalide
+        '404':
+          description: Aucun événement possédant cet id trouvé
+        '401':
+          description: Il faut être connecté pour utiliser cette fonctionnalitée
+        '200':
+          description: un objet RendezVous et les actions possibles
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
                   rdv:
-                    type: object
-                    properties:
-                      title: 
-                        type: string
-                      date: 
-                        type: string
-                      place: 
-                        type: string
-                      description: 
-                        type: string
-                      owner: 
-                        type: string
-                      _id:
-                        type: string
-                      __v: 
-                        type: integer
+                    $ref: '#/components/schemas/CompleteRendezVous'
+                  actions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Actions'
+  /event/delete/{id}:
+    delete:
+      tags:
+        - Rendez-vous
+      summary: Supprimer un événement
+      parameters:
+        - name: id
+          in: path
+          description: ID de l'événement à supprimer
+          required: true
+          schema:
+            type: string
+            example: '637740df4a124e6e61459d92'
+      responses:
+        '400':
+          description: Format de l'id invalide
+        '404':
+          description: Aucun événement possédant cet id trouvé
+        '200':
+          description: Un événement a été trouvé et supprimé
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        link:
+                          type: string
+                          example: "/event/create/"
+                        method: 
+                          type: string
+                          example: "post"
 
 components:
   schemas:
@@ -250,9 +222,54 @@ components:
       properties:
         title:
           type: string
+          example: une choucroute chez mémé
         date:
-          type: date
+          type: string
+          example: "2022-10-25T11:30:00Z"
+        endDate:
+          type: string
+          example: "2022-10-25T17:00:00Z"
         place:
           type: string
+          example: "28 rue du chêne, 88000 Vosges"
         description:
           type: string
+          example: "choucroute pour l'anniversaire de mémé (ne pas oublier le cadeau)"
+      required:
+        - title
+        - date
+    CompleteRendezVous:
+      properties:
+        title:
+          type: string
+          example: title
+        date:
+          type: string
+          example: "2022-12-25T00:30:00Z"
+        endDate:
+          type: string
+          example: "2022-12-26T01:00:00Z"
+        place:
+          type: string
+          example: "there"
+        description:
+          type: string
+          example: "this is a wonderful description"
+        owner: 
+          type: string
+          example: "635149330eac27517446494c"
+        _id: 
+          type: string
+          example: "63767163c1d5d7f8d523d2c1"
+        __v:
+          type: integer
+          example: 0
+    Actions:
+      type: object
+      properties:
+        link:
+          type: string
+          example: "/event/..."
+        method: 
+          type: string
+          example: "post"
