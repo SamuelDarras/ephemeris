@@ -52,6 +52,10 @@ body {
     padding-right: .5em;
 }
 
+.cell-disabled {
+    background-color: #bbbbbb;
+}
+
 .rendez-vous {
     color: var(--rdv-fg);
     background-color: var(--rdv-bg);
