@@ -71,7 +71,7 @@ paths:
           description: ID de l'événement à trouver
           required: true
           schema:
-            type: integer
+            type: string
             example: '637740df4a124e6e61459d92'
       responses:
         '400':

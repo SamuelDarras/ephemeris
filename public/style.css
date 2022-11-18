@@ -54,6 +54,10 @@ body {
     padding-right: .5em;
 }
 
+.cell-disabled {
+    background-color: #bbbbbb;
+}
+
 .main {
     display: flex;
     flex-wrap: nowrap;

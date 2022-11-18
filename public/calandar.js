@@ -22,10 +22,16 @@ async function constructCalandar(id) {
     let offsetMonth = new Date(now.getFullYear(), now.getMonth()).getDay()
 
 
-    let res = await fetch(`/event/get-month/${now.getFullYear()}/${now.getMonth() + 1}`, {
-        credentials: 'same-origin'
-    })
-    res = await res.json()
+    let res = { rdvs: [], actions: [] }
+    for (let i = -1; i < 2; i++) {
+        let r =  await (await fetch(`/event/get-month/${now.getFullYear()}/${now.getMonth() + i}`, {
+            credentials: 'same-origin'
+        })).json()
+        res.rdvs = res.rdvs.concat(r.rdvs)
+        res.actions = res.actions.concat(r.action)
+    }
+
+
     let dates = []
     for (let i = 0; i < 42; i++) {
         let curDate = new Date(now.getFullYear(), now.getMonth(), i - offsetMonth + 2)
@@ -68,6 +74,9 @@ async function constructCalandar(id) {
             let cell = document.createElement("div")
             cell.classList.add("col")
             cell.classList.add("calendar-cell")
+            if (curDate.date.getMonth() != now.getMonth()) {
+                cell.classList.add("cell-disabled")
+            }
 
             row.appendChild(cell)
             cell.onclick = (event) => handleClickOnDay(event, curDate.date)
