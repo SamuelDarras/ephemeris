@@ -3,9 +3,17 @@
     --orange-yellow-crayola: #ffd166ff;
     --caribbean-green: #06d6a0ff;
     --blue-ncs: #118ab2ff;
+    --lavender-grey: #c1b8c8;
     --midnight-green-eagle-green: #073b4cff;
     --rdv-bg: var(--caribbean-green);
     --rdv-fg: var(--midnight-green-eagle-green);
+    --tache-bg: var(--blue-ncs);
+    --tache-fg: var(--midnight-green-eagle-green);
+    --bg: var(--lavender-grey);
+}
+
+body {
+    background-color: var(--bg);
 }
 
 .calendar-cell {
@@ -14,24 +22,44 @@
     overflow-y: auto;
     overflow-x: hidden;
     border: 1px solid black;
+    background-color: white;
 }
 
-.rendez-vous {
+.calendar-header {
+    background-color: var(--caribbean-green);
+}
+
+.cell-elem {
     justify-content: left;
     padding: .2em;
     padding-left: .5em;
     border-radius: .4em;
     margin-bottom: .1em;
-    color: var(--rdv-fg);
-    background-color: var(--rdv-bg);
     max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-#calendar {
-    margin: 1em;
+.cell-elem.debut::after {
+    content: "Debut ->";
+    font-style: italic;
+    padding-left: .5em;
+}
+.cell-elem.fin::before {
+    content: "-> Fin";
+    font-style: italic;
+    padding-right: .5em;
+}
+
+.rendez-vous {
+    color: var(--rdv-fg);
+    background-color: var(--rdv-bg);
+}
+
+.tache {
+    color: var(--tache-fg);
+    background-color: var(--tache-bg);
 }
 
 .main {
@@ -41,4 +69,14 @@
     max-height: 100vh;
     overflow-x: auto;
     overflow-y: hidden;
+}
+
+.today::before {
+    position: absolute;
+    content: '';
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 1.5em;
+    background-color: #118ab277;
 }
