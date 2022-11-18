@@ -104,7 +104,8 @@ app.post("/event/create/", async (req, res) => {
     checkConnected(req, res, async (user) => {
         let rdv = new RendezVous({
             title: req.body.title,
-            date: req.body.date,
+            startDate: req.body.startDate,
+            endDate: req.body.endDate,
             place: req.body.place,
             description: req.body.description,
             owner: user._id
@@ -162,7 +163,7 @@ app.get("/event/get-month/:year/:month", async (req, res) => {
         }
 
         let rdvs = await RendezVous.find({
-            date: {
+            dateStart: {
                 $gte: new Date(req.params.year, 1*req.params.month-1, 1),
                 $lt: new Date(req.params.year, 1*req.params.month, 1)
             },

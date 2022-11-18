@@ -51,7 +51,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="addRDVLabel">Ajouter un rendez-vous le </h1>
-          <input class="mw-10 ms-2" type="date" class="form-control" id="modalDay">
+          <input class="mw-10 ms-2" type="date" class="form-control" id="modalDateStart">
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body needs-validation" novalidate>
@@ -64,19 +64,16 @@
 
             <div class="md-6">
               <label for="date" class="form-label">Heure</label>
-              <input type="time" class="form-control" id="date" required>
-              <label id="heureError" style="color:red;font-size: small;" class="d-none"></label>
+              <input type="time" class="form-control" id="modalTimeStart" required>
+              <label id="modalTimeStartError" style="color:red;font-size: small;" class="d-none"></label>
             </div>
 
             <label for="">Date de fin</label>
             <div class="input-group">
-              <div class="input-group-text">
-                <input type="checkbox" id="checkboxFin" class="form-check-input" onchange="document.getElementById('timeFin').disabled = !this.checked; document.getElementById('dateFin').disabled = !this.checked;">
-              </div>
-              <input type="date" class="form-control" disabled name="" id="dateFin">
-              <input type="time" class="form-control" disabled name="" id="timeFin">
+              <input type="date" class="form-control"  name="" id="modalDateEnd">
+              <input type="time" class="form-control"  name="" id="modalTimeEnd">
             </div>
-            <label id="dateFinError" style="color:red;font-size: small;" class="d-none"></label>
+            <label id="modalFinError" style="color:red;font-size: small;" class="d-none"></label>
 
             <div class="md-6">
               <label for="lieux" class="form-label">Lieux</label>

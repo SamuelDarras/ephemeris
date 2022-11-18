@@ -1,22 +1,17 @@
 const modal = new bootstrap.Modal(document.getElementById('myModal'))
-const modalDay = document.getElementById("modalDay")
+const modalDateStart = document.getElementById("modalDateStart")
 const titre = document.getElementById("titre")
-const heure = document.getElementById("date")
+const modalTimeStart = document.getElementById("modalTimeStart")
 const lieux = document.getElementById("lieux")
 const description = document.getElementById("description")
-const checkboxEnd = document.getElementById("checkboxFin")
-const dayEnd = document.getElementById("dateFin")
-const heureEnd = document.getElementById("timeFin")
+const modalDateEnd = document.getElementById("modalDateEnd")
+const modalTimeEnd = document.getElementById("modalTimeEnd")
 
 document.getElementById('myModal').addEventListener("hidden.bs.modal", () => {
     document.getElementById("modalForm").reset()
 })
 
 
-document.getElementById('myModal').addEventListener("show.bs.modal", () => {
-    dayEnd.disabled = !checkboxEnd.checked
-    heureEnd.disabled = !checkboxEnd.checked
-})
 
 let mapRdvs = {}
 
@@ -36,13 +31,19 @@ async function constructCalandar(id) {
         let curDate = new Date(now.getFullYear(), now.getMonth(), i - offsetMonth + 2)
         let rdvs = res.rdvs.filter((v) => {
             mapRdvs[v._id] = v
-            return new Date(v.date).toDateString() == curDate.toDateString() || new Date(v.endDate).toDateString() == curDate.toDateString()
+            return new Date(v.startDate).toDateString() == curDate.toDateString() || new Date(v.endDate).toDateString() == curDate.toDateString()
         }).map(rdv => {
             let ending = "none"
-            if (new Date(rdv.date).toDateString() == curDate.toDateString() && rdv.endDate != null) {
-                ending = "debut"
-            } else if (rdv.endDate != null && new Date(rdv.endDate).toDateString() == curDate.toDateString()) {
-                ending = "fin"
+            let startDateString = new Date(rdv.startDate).toDateString()
+            let endDateString = new Date(rdv.endDate).toDateString()
+            let curDateString = curDate.toDateString()
+            if(startDateString != endDateString){
+                if(curDateString == startDateString){
+                    ending = "debut"
+                }
+                else{
+                    ending = "fin"
+                }
             }
             return {
                 ending,
@@ -81,17 +82,18 @@ async function constructCalandar(id) {
             `
 
             for (let rdv of curDate.rdvs.sort((rdvA, rdvB) => {
-                if (new Date(rdvA.date).getTime() > new Date(rdvB.date).getTime()) {
+                if (new Date(rdvA.startDate).getTime() > new Date(rdvB.startDate).getTime()) {
                     return 1
-                } else if (new Date(rdvA.date).getTime() < new Date(rdvB.date).getTime()) {
+                } else if (new Date(rdvA.startDate).getTime() < new Date(rdvB.startDate).getTime()) {
                     return -1
                 } else {
                     return 0
                 }
             })) {
-                let dateExacte = new Date(rdv.date)
+                let dateExacte = new Date(rdv.startDate)
+                console.log(rdv)
                 div.innerHTML += `\
-                    <p class="${rdv.ending == 'none' ? '' : rdv.ending} cell-elem ${rdv.endDate == null ? 'tache' : 'rendez-vous'}" onclick="handleClickOnRendezVous(event, '${rdv._id}')">${dateExacte.getHours().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}:${dateExacte.getMinutes().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} - ${rdv.title}</p>\
+                    <p class="${rdv.ending == 'none' ? '' : rdv.ending} cell-elem " onclick="handleClickOnRendezVous(event, '${rdv._id}')">${dateExacte.getHours().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}:${dateExacte.getMinutes().toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })} - ${rdv.title}</p>\
                 `
             }
         }
@@ -100,15 +102,19 @@ async function constructCalandar(id) {
 
 function handleClickOnDay(event, date) {
     document.getElementById("addRDVLabel").innerHTML = "Ajouter un rendez-vous le"
-    modalDay.value = [date.getFullYear(),
+    modalDateStart.value = [date.getFullYear(),
     ("" + (date.getMonth() + 1)).length == 2 ? "" + (date.getMonth() + 1) : "0" + (date.getMonth() + 1),
     ("" + date.getDate()).length == 2 ? "" + date.getDate() : "0" + date.getDate()
     ].join('-')
 
+
+
     document.getElementById("modalValider").onclick = () => {
         if (formValidate()) {
-            let date = new Date(modalDay.value)
-            date.setHours(...heure.value.split(":"))
+            console.log(modalDateStart.value + " "+ modalTimeStart.value)
+            console.log(modalDateEnd.value + " "+ modalTimeEnd.value)
+            let date = new Date(modalDateStart.value)
+            date.setHours(...modalTimeStart.value.split(":"))
 
             fetch("/event/create/", {
                 method: "POST",
@@ -116,7 +122,7 @@ function handleClickOnDay(event, date) {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ title: titre.value, date: date, endDate: checkboxEnd.checked ? new Date("" + dayEnd.value + " " + heureEnd.value) : null, place: lieux.value, description: description.value })
+                body: JSON.stringify({ title: titre.value, startDate: date, endDate: new Date("" + modalDateEnd.value + " " + modalTimeEnd.value), place: lieux.value, description: description.value })
             }).then(modal.hide())
         }
     }
@@ -129,39 +135,33 @@ function handleClickOnRendezVous(event, rdvId) {
     document.getElementById("addRDVLabel").innerHTML = "Rendez-vous le"
 
     let rdv = mapRdvs[rdvId]
-    let date = new Date(rdv.date)
-    let dateFin = new Date(rdv.endDate)
+    let dateStart = new Date(rdv.startDate)
+    let dateEnd = new Date(rdv.endDate)
 
     titre.value = rdv.title
-    heure.value = ("" + date.getHours()).padStart(2, "0") + ":" + ("" + date.getMinutes()).padStart(2, "0")
+    modalTimeStart.value = ("" + dateStart.getHours()).padStart(2, "0") + ":" + ("" + dateStart.getMinutes()).padStart(2, "0")
     lieux.value = rdv.place
     description.value = rdv.description
 
-    modalDay.value = [date.getFullYear(),
-    ("" + (date.getMonth() + 1)).padStart(2, "0"),
-    ("" + (date.getDate())).padStart(2, "0"),
+    modalDateStart.value = [dateStart.getFullYear(),
+    ("" + (dateStart.getMonth() + 1)).padStart(2, "0"),
+    ("" + (dateStart.getDate())).padStart(2, "0"),
     ].join('-')
 
-    checkboxEnd.checked = dateFin.valueOf() != 0
+    modalDateEnd.value = [
+        dateEnd.getFullYear(),
+        ("" + (dateEnd.getMonth() + 1)).padStart(2, "0"),
+        ("" + (dateEnd.getDate())).padStart(2, "0"),
+    ].join('-')
 
-    if (checkboxEnd.checked) {
-        dayEnd.value = [
-            dateFin.getFullYear(),
-            ("" + (dateFin.getMonth() + 1)).padStart(2, "0"),
-            ("" + (dateFin.getDate())).padStart(2, "0"),
-        ].join('-')
+    modalTimeEnd.value = ("" + dateEnd.getHours()).padStart(2, "0") + ":" + ("" + dateEnd.getMinutes()).padStart(2, "0")
 
-        heureEnd.value = ("" + dateFin.getHours()).padStart(2, "0") + ":" + ("" + dateFin.getMinutes()).padStart(2, "0")
-    } else {
-        dayEnd.value = ""
-        heureEnd.value = ""
-    }
 
 
     document.getElementById("modalValider").onclick = () => {
         if (formValidate()) {
-            let date = new Date(modalDay.value)
-            date.setHours(...heure.value.split(":"))
+            let date = new Date(modalDateStart.value)
+            date.setHours(...modalTimeStart.value.split(":"))
 
             fetch("/event/edit/" + rdv._id, {
                 method: "POST",
@@ -169,9 +169,23 @@ function handleClickOnRendezVous(event, rdvId) {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ title: titre.value, date: date, endDate: checkboxEnd.checked ? new Date("" + dayEnd.value + " " + heureEnd.value) : null, place: lieux.value, description: description.value })
+                body: JSON.stringify({ title: titre.value, startDate: date, endDate: new Date("" + modalDateEnd.value + " " + modalTimeEnd.value), place: lieux.value, description: description.value })
             }).then(modal.hide())
         }
+    }
+
+    document.getElementById('modalSupprimer').onclick = () => {
+        let confirmAction = confirm("Êtes-vous sûr de vouloir supprimer ce rendez-vous ?")
+        if (confirmAction) {
+            fetch("event/delete/" + rdv._id, {
+                method: "DELETE",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }).then(modal.hide())
+        }
+
     }
 
     modal.show()
@@ -179,8 +193,8 @@ function handleClickOnRendezVous(event, rdvId) {
 
 function formValidate() {
     let errorTitre = document.getElementById("titreError")
-    let errorHeure = document.getElementById("heureError")
-    let errorFin = document.getElementById("dateFinError")
+    let errorHeure = document.getElementById("modalTimeStartError")
+    let errorFin = document.getElementById("modalFinError")
 
     let error = 0
 
@@ -193,7 +207,7 @@ function formValidate() {
         errorTitre.classList.add("d-none")
     }
 
-    if (heure.value.length == 0) {
+    if (modalTimeEnd.value.length == 0) {
         errorHeure.innerHTML = "L'heure ne doit pas être vide"
         errorHeure.classList.remove("d-none")
         error++
@@ -202,14 +216,12 @@ function formValidate() {
         errorHeure.classList.add("d-none")
     }
 
-    if (checkboxEnd.checked) {
-        if (!heureEnd.value.length || !dayEnd.value.length || (new Date(modalDay.value + " " + heure.value).valueOf() > new Date(dayEnd.value + " " + heureEnd.value).valueOf())) {
-            errorFin.innerHTML = "La date de fin est antérieur à celle de début"
-            errorFin.classList.remove("d-none")
-            error++
-        } else {
-            errorFin.classList.add("d-none")
-        }
+    if (!modalTimeEnd.value.length || !modalDateEnd.value.length || (new Date(modalDateStart.value + " " + modalTimeStart.value).valueOf() > new Date(modalDateEnd.value + " " + modalTimeEnd.value).valueOf())) {
+        errorFin.innerHTML = "La date de fin est antérieur à celle de début"
+        errorFin.classList.remove("d-none")
+        error++
+    } else {
+        errorFin.classList.add("d-none")
     }
 
     return error == 0
