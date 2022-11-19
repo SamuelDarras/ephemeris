@@ -1,4 +1,4 @@
-import { openModal } from "./modal.js";
+import { openModal, closeModal } from "./modal.js"
 
 function associateCellToRdv(cells, rdv) {
     let r = []
@@ -36,7 +36,7 @@ export class Calendar {
         let header = document.createElement("div")
         header.classList.add("calendar-header")
         this.element.prepend(header)
-        for (let day of ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Diamanche"]) {
+        for (let day of ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]) {
             let cell = document.createElement("div")
             cell.classList.add("calendar-cell")
             cell.innerHTML = day
@@ -93,21 +93,33 @@ class Cell {
 
         cell.onclick = (e) => {
             e.stopPropagation()
-            openModal({date: date}, "Créer un événement")
+            openModal({ date: date }, "Créer un événement")
         }
+
+        this.rendezVous = null
     }
 
-    addRendezVous(rdv, end, callback) {
+    addRendezVous(rdv, end, callback) { // TODO: ajouter des rdv sans rien pour alligner les autres (ex: toto 2)
         let rdvElem = document.createElement("p")
         rdvElem.classList.add("rendez-vous")
 
         rdvElem.classList.add(end)
 
         rdvElem.innerHTML = `${rdv.title}`
-        
+
         rdvElem.onclick = callback
 
         this.cell.append(rdvElem)
+
+        this.rendezVous = rdv
+        rdvElem.addEventListener("mouseenter", () => {
+            rdv.hover(true)
+        })
+        rdvElem.addEventListener("mouseleave", () => {
+            rdv.hover(false)
+        })
+
+        return rdvElem
     }
 }
 
@@ -123,6 +135,7 @@ class RendezVous {
         this.owner = owner
 
         this.cells = cells
+        this.shards = []
     }
 
     build() {
@@ -135,10 +148,68 @@ class RendezVous {
             } else if (this.cells.length > 2) {
                 end = "middle"
             }
-            cell.addRendezVous(this, end, (e) => {
+            let shard = cell.addRendezVous(this, end, (e) => {
                 e.stopPropagation()
                 openModal(this, "Modifier l'événement")
             })
+            this.shards.push(shard)
         }
+    }
+
+    hover(status) {
+        for (let shard of this.shards) {
+            if (status) {
+                shard.classList.add("hover")
+            } else {
+                shard.classList.remove("hover")
+            }
+        }
+    }
+
+    update(newData) {
+        let newThis = {}
+
+        for (let change of Object.keys(newData).map(entry => {
+            let newEntry = newData[entry]
+            let thisEntry = this[entry]
+            if (entry.includes("Date")) {
+                newEntry = new Date(newEntry)
+                newEntry.setHours(newEntry.getHours()+1)
+
+                thisEntry = new Date(thisEntry)
+                thisEntry.setHours(thisEntry.getHours()+1)
+
+                newEntry = newEntry.getTime()
+                thisEntry = thisEntry.getTime()
+            }
+            return [thisEntry, newEntry, entry]
+        }).filter(e => e[0] != e[1])) {
+            if (change[0] != change[1]) {
+                if (change[2].includes("Date")) {
+                    this[change[2]] = new Date(change[1])
+                    newThis[change[2]] = new Date(change[1])
+                } else {
+                    this[change[2]] = change[1]
+                    newThis[change[2]] = change[1]
+                }
+            }
+        }
+
+        if (validate(newThis) && Object.keys(newThis).length) {
+            fetch(`/event/edit/${this._id}`, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newThis)
+            }).then(() => {
+                closeModal()
+            }).catch(console.error)
+        }
+    }
+
+    validate(newData) {
+        return true
     }
 }

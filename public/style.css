@@ -36,7 +36,7 @@ body {
     border: black solid 1px;
 }
 .calendar-cell:hover {
-    background-color: #eeeeee;
+    background-color: #d7d7d7;
 }
 
 .cell-label {
@@ -51,6 +51,9 @@ body {
     cursor: pointer;
     /* padding-left: 1em;
     padding-right: 1em; */
+}
+.rendez-vous.hover {
+    filter: brightness(130%)
 }
 .rendez-vous.start {
     border-radius: .5em 0 0 .5em;
@@ -82,9 +85,13 @@ body {
 #modal.open {
     display: block;
 }
-
+.modal-close {
+    font-weight: bolder;
+}
 .modal-close:hover {
     cursor: pointer;
+    user-select: none;
+    color: #535353;
 }
 
 .modal-content {
