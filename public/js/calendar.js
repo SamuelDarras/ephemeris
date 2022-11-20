@@ -54,7 +54,6 @@ export class Calendar {
 
         for (let i = 0; i < 7 * 6; i++) {
             let date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset + i - 1)
-
             let content = document.createElement("div")
             content.innerHTML = `${date.getDate()}`
 
@@ -91,9 +90,12 @@ class Cell {
         this.cell = cell
         this.cell.appendChild(this.content)
 
+        let startDate = new Date(date.getTime() + 1000*60*60*13) 
+        let endDate = new Date(startDate.getTime() + 1000*60*15)
+
         cell.onclick = (e) => {
             e.stopPropagation()
-            openModal({ date: date }, "Créer un événement")
+            openModal({ title: "", startDate: startDate, endDate: endDate, place: "", description: "" }, "Créer un événement", null)
         }
 
         this.rendezVous = null
@@ -150,7 +152,7 @@ class RendezVous {
             }
             let shard = cell.addRendezVous(this, end, (e) => {
                 e.stopPropagation()
-                openModal(this, "Modifier l'événement")
+                openModal({title: this.title, startDate: this.startDate, endDate: this.endDate, place: this.place, description: this.description}, "Modifier l'événement", this)
             })
             this.shards.push(shard)
         }
@@ -195,21 +197,17 @@ class RendezVous {
             }
         }
 
-        if (validate(newThis) && Object.keys(newThis).length) {
-            fetch(`/event/edit/${this._id}`, {
-                method: "POST",
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(newThis)
-            }).then(() => {
-                closeModal()
-            }).catch(console.error)
-        }
-    }
-
-    validate(newData) {
-        return true
+        fetch(`/event/edit/${this._id}`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newThis)
+        }).then(() => {
+            closeModal()
+        }).catch(console.error)
+        
     }
 }
+
