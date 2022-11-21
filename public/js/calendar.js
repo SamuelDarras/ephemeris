@@ -24,12 +24,10 @@ export class Calendar {
 
         this.rdvs = []
         this.cells = []
+        this._buildHeaders()
         this._buildContent()
 
-        this._queryMonth().then(() => {
-            this._buildHeaders()
-            this.rdvs.forEach(rdv => rdv.build())
-        })
+        this._queryMonth()
     }
 
     _buildHeaders() {
@@ -65,15 +63,43 @@ export class Calendar {
 
     async _queryMonth() {
         let now = new Date()
-        await fetch(`/event/get-month/${now.getFullYear()}/${now.getMonth() + 1}`).then(async res => {
-            let rdvs = await res.json()
-            rdvs.rdvs.forEach(r => {
-                let newRdv = new RendezVous(r._id, r.title, new Date(r.startDate), new Date(r.endDate), r.place, r.description)
-                let elems = associateCellToRdv(this.cells, newRdv)
-                newRdv.cells = elems
-                this.rdvs.push(newRdv)
-            })
-        })
+        let monthBefore  = await (await fetch(`/event/get-month/${now.getFullYear()}/${now.getMonth()}`)).json()
+        let monthCurrent = await (await fetch(`/event/get-month/${now.getFullYear()}/${now.getMonth() + 1}`)).json()
+        let monthAfter   = await (await fetch(`/event/get-month/${now.getFullYear()}/${now.getMonth() + 2}`)).json()
+        
+        let rdvs = [].concat(monthBefore.rdvs, monthCurrent.rdvs, monthAfter.rdvs)
+        rdvs = rdvs.reduce((acc, cur) => {
+            if (acc[0].includes(cur._id)) {
+                return acc
+            } else {
+                acc[0].push(cur._id)
+                acc.push(cur)
+                return acc
+            }
+        }, [[]]).slice(1, -1)
+
+        rdvs.forEach(r => this.addRendezVous(r))
+    }
+
+    addRendezVous(rdv) {
+        let newRdv = new RendezVous(rdv._id, rdv.title, new Date(rdv.startDate), new Date(rdv.endDate), rdv.place, rdv.description)
+        let elems = associateCellToRdv(this.cells, newRdv)
+        newRdv.cells = elems
+        this.rdvs.push(newRdv)
+        newRdv.build()
+    }
+
+    updateRendezVous(rdv) {
+        this.deleteRendezVous(rdv)
+        this.addRendezVous(rdv)
+    }
+
+    deleteRendezVous(rdv) {
+        let updatedRendezVous = this.rdvs.find(that => rdv._id == that._id)
+        if (updatedRendezVous) {
+            updatedRendezVous.destroy()
+            this.rdvs = this.rdvs.filter(rdv => rdv._id != updatedRendezVous._id)
+        }
     }
 }
 
@@ -98,7 +124,7 @@ class Cell {
             openModal({ title: "", startDate: startDate, endDate: endDate, place: "", description: "" }, "Créer un événement", null)
         }
 
-        this.rendezVous = null
+        this.shards = {}
     }
 
     addRendezVous(rdv, end, callback) { // TODO: ajouter des rdv sans rien pour alligner les autres (ex: toto 2)
@@ -113,7 +139,7 @@ class Cell {
 
         this.cell.append(rdvElem)
 
-        this.rendezVous = rdv
+        this.shards[rdv._id] = rdvElem
         rdvElem.addEventListener("mouseenter", () => {
             rdv.hover(true)
         })
@@ -123,10 +149,14 @@ class Cell {
 
         return rdvElem
     }
+
+    remove(rdv) {
+        this.cell.removeChild(this.shards[rdv._id])
+    }
 }
 
-class RendezVous {
-    constructor(_id, title, startDate, endDate, place, description, owner, cells) {
+export class RendezVous {
+    constructor(_id, title, startDate, endDate, place, description, owner) {
         this._id = _id
 
         this.title = title
@@ -136,7 +166,7 @@ class RendezVous {
         this.description = description
         this.owner = owner
 
-        this.cells = cells
+        this.cells = []
         this.shards = []
     }
 
@@ -208,6 +238,12 @@ class RendezVous {
             closeModal()
         }).catch(console.error)
         
+    }
+
+    destroy() {
+        this.cells.forEach(cell => {
+            cell.remove(this)
+        })
     }
 }
 

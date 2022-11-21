@@ -8,11 +8,16 @@ import fs from "fs"
 import yaml from "js-yaml"
 import cookieParser from 'cookie-parser'
 import swaggerUi from "swagger-ui-express"
+import expressWs from "express-ws"
+
+import { EventEmitter } from "node:events"
 
 import { RendezVous, User } from "./models.js"
 
 mongoose.connect('mongodb+srv://dbUser:dbUserPassword@cluster0.fvrfwzh.mongodb.net/ephemeris?retryWrites=true&w=majority').then().catch(console.log)
 env.config()
+
+let evtEmitter = new EventEmitter()
 
 const app = express()
 app.use(cors({
@@ -117,6 +122,7 @@ app.post("/event/create/", async (req, res) => {
             sendError(res, BAD_REQUEST, err.errors)
             return
         }
+        evtEmitter.emit("create", rdv)
         res.status(200).json({
             rdv: rdv,
             actions: [
@@ -162,11 +168,27 @@ app.get("/event/get-month/:year/:month", async (req, res) => {
             return
         }
 
+        let debutMois = new Date(req.params.year, 1*req.params.month-1, 1)
+        let finMois = new Date(req.params.year, 1*req.params.month, 1)
+
         let rdvs = await RendezVous.find({
-            dateStart: {
-                $gte: new Date(req.params.year, 1*req.params.month-1, 1),
-                $lt: new Date(req.params.year, 1*req.params.month, 1)
-            },
+            $or: [
+                { $and: [
+                    {startDate: { $gt: debutMois, }},
+                    {startDate: { $lt: finMois, }},
+                    ]
+                },
+                { $and: [
+                    {startDate: { $lt: debutMois, }},
+                    {endDate: { $gt: finMois, }},
+                    ]
+                },
+                { $and: [
+                    {endDate: { $gt: debutMois, }},
+                    {endDate: { $lt: finMois, }},
+                    ]
+                },
+            ],
             owner: user
         })
         if (!rdvs) {
@@ -201,12 +223,13 @@ app.post("/event/edit/:id", async (req, res) => {
             return
         }
 
-        RendezVous.findByIdAndUpdate({ _id: req.params.id }, {$set: req.body}, { runValidators: true }, (err, rdvUpdated) => {
+        RendezVous.findByIdAndUpdate({ _id: req.params.id }, {$set: req.body}, { runValidators: true, new: true }, (err, rdvUpdated) => {
             if (err) {
                 sendError(res, BAD_REQUEST, err)
                 return
             }
 
+            evtEmitter.emit("edit", rdvUpdated)
             res.status(200).json({
                 rdv: rdvUpdated,
                 actions: [
@@ -234,6 +257,7 @@ app.delete("/event/delete/:id", async (req, res) => {
             return
         }
 
+        evtEmitter.emit("delete", rdv)
         await rdv.delete()              //!Attention si changement de la bdd
         res.status(200).json({
             actions: [
@@ -247,5 +271,22 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 //bind repository for client view
 app.use(express.static("public"))
+
+
+
+// Set up a headless websocket server that prints any
+// events that come in.
+expressWs(app)
+app.ws("/ws", (ws, req) => {
+    evtEmitter.on("create", evt => {
+        ws.send(JSON.stringify({ action: "create", rdv: evt }))
+    })
+    evtEmitter.on("edit", evt => {
+        ws.send(JSON.stringify({ action: "edit", rdv: evt }))
+    })
+    evtEmitter.on("delete", evt => {
+        ws.send(JSON.stringify({ action: "delete", rdv: evt }))
+    })
+})
 
 app.listen(3000, () => { console.log("serveur lance") })
