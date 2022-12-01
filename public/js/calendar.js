@@ -18,39 +18,46 @@ function intervalContained(a1, b1, a2, b2) {
 }
 
 export class Calendar {
+    static monthTab = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"]
+
     constructor(id) {
         this.id = id
         this.element = document.getElementById(this.id)
+        this.displayedMonth = new Date()
         
         this.rdvs = []
         this.cells = []
         this._buildHeaders()
 
-        this.displayedMonth = new Date()
         
         this._buildContent()
         this._queryMonth()
-
     }
 
     _buildHeaders() {
+
+        let month = document.createElement("div")
+        month.innerHTML = Calendar.monthTab[this.displayedMonth.getMonth()]
+        
         let header = document.createElement("div")
         header.classList.add("calendar-header")
+        
         this.element.prepend(header)
         for (let day of ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]) {
             let cell = document.createElement("div")
             cell.classList.add("calendar-cell")
             cell.innerHTML = day
-
+            
             header.append(cell)
         }
+        
+        this.element.prepend(month)
     }
 
     _buildContent() {
         let container = document.createElement("div")
         container.classList.add("calendar-content")
 
-        //let now = new Date()
         let offset = this.displayedMonth.getDate() - (new Date(this.displayedMonth.getFullYear(), this.displayedMonth.getMonth()).getDate())
 
         for (let i = 0; i < 7 * 6; i++) {
@@ -65,11 +72,10 @@ export class Calendar {
     }
 
     async _queryMonth() {
-        //let now = new Date()
         let monthBefore  = await (await fetch(`/event/get-month/${this.displayedMonth.getFullYear()}/${this.displayedMonth.getMonth()}`)).json()
         let monthCurrent = await (await fetch(`/event/get-month/${this.displayedMonth.getFullYear()}/${this.displayedMonth.getMonth() + 1}`)).json()
         let monthAfter   = await (await fetch(`/event/get-month/${this.displayedMonth.getFullYear()}/${this.displayedMonth.getMonth() + 2}`)).json()
-        
+
         let rdvs = [].concat(monthBefore.rdvs, monthCurrent.rdvs, monthAfter.rdvs)
         rdvs = rdvs.reduce((acc, cur) => {
             if (acc[0].includes(cur._id)) {
@@ -113,11 +119,10 @@ export class Calendar {
             this.displayedMonth.setMonth(this.displayedMonth.getMonth() - 1).toLocaleString()
         }
 
-        console.log(this.displayedMonth);
-
         this.cells = []
         this.element.replaceChildren()
 
+        this._buildHeaders()
         this._buildContent()
         this._queryMonth()
     }
