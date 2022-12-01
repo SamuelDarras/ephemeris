@@ -58,7 +58,11 @@ export class Calendar {
         let container = document.createElement("div")
         container.classList.add("calendar-content")
 
-        let offset = this.displayedMonth.getDate() - (new Date(this.displayedMonth.getFullYear(), this.displayedMonth.getMonth()).getDate())
+        let now = new Date()
+        let offset = this.displayedMonth.getDate() - (new Date(this.displayedMonth.getFullYear(), this.displayedMonth.getMonth()).getDate()) + this.displayedMonth.getDay() - 2
+        if (offset < 0) {
+            offset += 7
+        }
 
         for (let i = 0; i < 7 * 6; i++) {
             let date = new Date(this.displayedMonth.getFullYear(), this.displayedMonth.getMonth(), this.displayedMonth.getDate() - offset + i - 1)
