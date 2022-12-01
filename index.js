@@ -207,6 +207,99 @@ app.get("/event/get-month/:year/:month", async (req, res) => {
     })
 })
 
+app.get("/event/get-week/:year/:week", async (req, res) => {
+    checkConnected(req, res, async (user) => {
+        if (!req.params.year || !req.params.week) {
+            sendError(res, BAD_REQUEST)
+            return
+        }
+
+        let debutAnnee = new Date(req.params.year)
+        let debutSemaine = new Date(debutAnnee.valueOf() + (req.params.week) * 604800000 - (debutAnnee.getDay()-1) * 86400000);
+        let finSemaine = new Date(debutSemaine.getFullYear(), debutSemaine.getMonth(), debutSemaine.getDate() + 7);
+
+        let rdvs = await RendezVous.find({
+            $or: [
+                { $and: [
+                    {startDate: { $gt: debutSemaine, }},
+                    {startDate: { $lt: finSemaine, }},
+                    ]
+                },
+                { $and: [
+                    {startDate: { $lt: debutSemaine, }},
+                    {endDate: { $gt: finSemaine, }},
+                    ]
+                },
+                { $and: [
+                    {endDate: { $gt: debutSemaine, }},
+                    {endDate: { $lt: finSemaine, }},
+                    ]
+                },
+            ],
+            owner: user
+        })
+        if (!rdvs) {
+            sendError(res, RESSOURCE_NOT_FOUND)
+            return
+        }
+        res.status(200).json({
+            rdvs: rdvs,
+            actions: rdvs.map(rdv => {
+                return [
+                    { link: `/event/edit/${rdv._id}`, method: "post" },
+                    { link: `/event/delete/${rdv._id}`, method: "delete" }
+                ]
+            })
+        })
+    })
+})
+
+app.get("/event/get-day/:year/:month/:day", async (req, res) => {
+    checkConnected(req, res, async (user) => {
+        if (!req.params.year || !req.params.month || !req.params.day) {
+            sendError(res, BAD_REQUEST)
+            return
+        }
+
+        let debutJour = new Date(req.params.year, 1*req.params.month-1, req.params.day);
+        let finJour = new Date(req.params.year, 1*req.params.month-1, 1*req.params.day+1);
+
+        let rdvs = await RendezVous.find({
+            $or: [
+                { $and: [
+                    {startDate: { $gt: debutJour, }},
+                    {startDate: { $lt: finJour, }},
+                    ]
+                },
+                { $and: [
+                    {startDate: { $lt: debutJour, }},
+                    {endDate: { $gt: finJour, }},
+                    ]
+                },
+                { $and: [
+                    {endDate: { $gt: debutJour, }},
+                    {endDate: { $lt: finJour, }},
+                    ]
+                },
+            ],
+            owner: user
+        })
+        if (!rdvs) {
+            sendError(res, RESSOURCE_NOT_FOUND)
+            return
+        }
+        res.status(200).json({
+            rdvs: rdvs,
+            actions: rdvs.map(rdv => {
+                return [
+                    { link: `/event/edit/${rdv._id}`, method: "post" },
+                    { link: `/event/delete/${rdv._id}`, method: "delete" }
+                ]
+            })
+        })
+    })
+})
+
 app.post("/event/edit/:id", async (req, res) => {
     checkConnected(req, res, async (user) => {
         if (!isValidObjectId(req.params.id)) {

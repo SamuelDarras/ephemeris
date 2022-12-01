@@ -1,35 +1,36 @@
-import { Cell } from "./cell.js";
-import { RendezVous } from "./rendez_vous.js";
+import { RendezVous } from "./rendez_vous.js"
+import { Cell } from "./cell.js"
 
-
-
-export class Calendar {
+export class Week {
     static monthTab = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"]
 
     constructor(id) {
         this.id = id
         this.element = document.getElementById(this.id)
-        this.displayedMonth = new Date()
-        
+
+        this.debutSemaine = new Date()
+
+        this.debutSemaine.setDate(this.debutSemaine.getDate() - this.debutSemaine.getDay() + 1)
+
         this.rdvs = []
     }
 
     _buildHeaders() {
         let month = document.createElement("div")
-        month.innerHTML = Calendar.monthTab[this.displayedMonth.getMonth()]
-        
+        month.innerHTML = Week.monthTab[this.debutSemaine.getMonth()]
+
         let header = document.createElement("div")
         header.classList.add("calendar-header")
-        
+
         this.element.prepend(header)
         for (let day of ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]) {
             let cell = document.createElement("div")
             cell.classList.add("calendar-cell")
             cell.innerHTML = day
-            
+
             header.append(cell)
         }
-        
+
         this.element.prepend(month)
     }
 
@@ -37,13 +38,13 @@ export class Calendar {
         let container = document.createElement("div")
         container.classList.add("content")
 
-        let offset = this.displayedMonth.getDate() - (new Date(this.displayedMonth.getFullYear(), this.displayedMonth.getMonth()).getDate()) + this.displayedMonth.getDay() - 2
+        let offset = this.debutSemaine.getDay() - 1
         if (offset < 0) {
             offset += 7
         }
 
-        for (let i = 0; i < 7 * 6; i++) {
-            let date = new Date(this.displayedMonth.getFullYear(), this.displayedMonth.getMonth(), this.displayedMonth.getDate() - offset + i - 1)
+        for (let i = 0; i < 7; i++) {
+            let date = new Date(this.debutSemaine.getFullYear(), this.debutSemaine.getMonth(), this.debutSemaine.getDate() + i - offset)
             let content = document.createElement("div")
             content.innerHTML = `${date.getDate()}`
 
@@ -53,12 +54,14 @@ export class Calendar {
         this.element.append(container)
     }
 
-    async _queryMonth() {
-        let monthBefore  = await (await fetch(`/event/get-month/${this.displayedMonth.getFullYear()}/${this.displayedMonth.getMonth()}`)).json()
-        let monthCurrent = await (await fetch(`/event/get-month/${this.displayedMonth.getFullYear()}/${this.displayedMonth.getMonth() + 1}`)).json()
-        let monthAfter   = await (await fetch(`/event/get-month/${this.displayedMonth.getFullYear()}/${this.displayedMonth.getMonth() + 2}`)).json()
+    async _queryWeek() {
+        let dateDebutAnnee = new Date(this.debutSemaine.getFullYear(), 0, 1)
+        let displayedWeek = 1 + Math.floor((this.debutSemaine - dateDebutAnnee) / (7 * 24 * 60 * 60 * 1000))
+        let weekBefore = await (await fetch(`/event/get-week/${this.debutSemaine.getFullYear()}/${displayedWeek-1}`)).json()
+        let weekCurrent = await (await fetch(`/event/get-week/${this.debutSemaine.getFullYear()}/${displayedWeek}`)).json()
+        let weekAfter = await (await fetch(`/event/get-week/${this.debutSemaine.getFullYear()}/${displayedWeek+1}`)).json()
 
-        let rdvs = [].concat(monthBefore.rdvs, monthCurrent.rdvs, monthAfter.rdvs)
+        let rdvs = [].concat(weekBefore.rdvs, weekCurrent.rdvs, weekAfter.rdvs)
         rdvs.filter(() => {
             let acc = []
             return rdv => {
@@ -70,7 +73,7 @@ export class Calendar {
             }
         })
 
-        rdvs.forEach(r => this.addRendezVous(r))
+        weekCurrent.rdvs.forEach(r => this.addRendezVous(r))
     }
 
     addRendezVous(rdv) {
@@ -94,32 +97,32 @@ export class Calendar {
         }
     }
 
-    change(sens){
-        if (sens === "add"){
-            this.displayedMonth.setMonth(this.displayedMonth.getMonth() + 1).toLocaleString()
+    change(sens) {
+        if (sens === "add") {
+            this.debutSemaine.setDate(this.debutSemaine.getDate() + 7)
         }
-        else{
-            this.displayedMonth.setMonth(this.displayedMonth.getMonth() - 1).toLocaleString()
+        else {
+            this.debutSemaine.setDate(this.debutSemaine.getDate() - 7)
         }
-
         this._build()
     }
 
     _build() {
         this.cells = []
         this.element.replaceChildren()
+
         this._buildHeaders()
         this._buildContent()
-        this._queryMonth()
+        this._queryWeek()
     }
 
     show(date) {
-        this.displayedMonth = date
+        this.debutSemaine = new Date(date.getFullYear(), date.getMonth())
         this._build()
         this.element.style["display"] = ""
     }
     hide() {
         this.element.style["display"] = "none"
-        return this.displayedMonth
+        return this.debutSemaine
     }
 }
