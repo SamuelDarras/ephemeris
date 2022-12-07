@@ -115,6 +115,16 @@ export class Jour {
         this._build()
     }
 
+    changeDate(value){
+        let newDate = new Date(value);
+
+        this.displayedDay.setFullYear(newDate.getFullYear());
+        this.displayedDay.setMonth(newDate.getMonth());
+        this.displayedDay.setDate(newDate.getDate())
+
+        this._build();
+    }
+
     show(date) {
         this.displayedDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0)
         this._build()

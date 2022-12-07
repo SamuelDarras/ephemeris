@@ -107,6 +107,16 @@ export class Week {
         this._build()
     }
 
+    changeDate(value){
+        let newDate = new Date(value);
+
+        this.debutSemaine.setFullYear(newDate.getFullYear());
+        this.debutSemaine.setMonth(newDate.getMonth());
+        this.debutSemaine.setDate(newDate.getDate())
+
+        this._build();
+    }
+
     _build() {
         this.cells = []
         this.element.replaceChildren()

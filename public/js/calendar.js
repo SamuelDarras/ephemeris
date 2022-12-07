@@ -94,15 +94,25 @@ export class Calendar {
         }
     }
 
-    change(sens){
+    change(sens, n){
         if (sens === "add"){
-            this.displayedMonth.setMonth(this.displayedMonth.getMonth() + 1).toLocaleString()
+            this.displayedMonth.setMonth(this.displayedMonth.getMonth() + n).toLocaleString()
         }
         else{
-            this.displayedMonth.setMonth(this.displayedMonth.getMonth() - 1).toLocaleString()
+            this.displayedMonth.setMonth(this.displayedMonth.getMonth() - n).toLocaleString()
         }
 
         this._build()
+    }
+
+    changeDate(value){
+        let newDate = new Date(value);
+
+        if(newDate.getMonth() === this.displayedMonth.getMonth()) return
+        this.displayedMonth.setFullYear(newDate.getFullYear());
+        this.displayedMonth.setMonth(newDate.getMonth());
+
+        this._build();
     }
 
     _build() {

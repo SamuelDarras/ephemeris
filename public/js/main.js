@@ -9,15 +9,19 @@ let vues = [
     new Jour("day"),
 ]
 vues.forEach(vue => vue.hide())
-let c = vues[0]
+let c = vues[document.getElementById("select-view").value]
 c.show(new Date())
 
 
 const btnMonthBefore = document.getElementById("btnMonthBefore")
 const btnMonthAfter = document.getElementById("btnMonthAfter")
 
-btnMonthBefore.addEventListener("click", evt => {c.change("sub")})
-btnMonthAfter.addEventListener("click", evt => {c.change("add")})
+const changeDatePicker = document.getElementById("changeDatePicker")
+changeDatePicker.value = new Date().toISOString().substring(0, 10);
+
+btnMonthBefore.addEventListener("click", evt => {c.change("sub", 1)})
+btnMonthAfter.addEventListener("click", evt => {c.change("add", 1)})
+changeDatePicker.addEventListener("change", evt => {c.changeDate(changeDatePicker.value)})
 
 const socket = new WebSocket("ws://"+location.host+"/ws")
 
