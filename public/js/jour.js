@@ -42,16 +42,6 @@ export class Jour {
         let container = document.createElement("div")
         container.classList.add("content")
 
-        // let content = document.createElement("div")
-        // content.innerHTML = `${this.displayedDay.getDate()}`
-        // for (let i = 0; i < 24; i++) {
-        //     let date = new Date(this.displayedDay.getFullYear(), this.displayedDay.getMonth(), this.displayedDay.getDate(), i)
-
-        //     let cell = document.createElement("div")
-        //     cell.innerHTML = `${date.getHours()}`
-        //     container.appendChild(cell)
-        //     // this.cells.push(cell)
-        // 
         this.element.append(container)
 
         this.content = container
@@ -87,13 +77,6 @@ export class Jour {
             rdvElement.style["left"] = left + "%"
             rdvElement.style["width"] = ((100/24)*(newRdv.endDate - newRdv.startDate)/(1000*60*60)) + "%"
         }
-        //  else if (newRdv.startDate.getDate() == this.displayedDay.getDate()) {
-        //     rdvElement.style["left"] = newRdv.startDate.getHours()*(100/24) + "%"
-        // } else if (newRdv.endDate.getDate() == this.displayedDay.getDate()) {
-        //     rdvElement.style["width"] = ((100/24) * Math.min(24, (newRdv.endDate - this.displayedDay) / (1000*60*60))) + "%"
-        // }
-        // rdvElement.style["left"] = newRdv.startDate.getHours()*(100/24) + "%"
-        // rdvElement.style["width"] = ((100/24) * Math.min(24, (newRdv.endDate - newRdv.startDate) / (1000*60*60))) + "%"
         
         this.content.appendChild(row)
     }
@@ -106,9 +89,11 @@ export class Jour {
     deleteRendezVous(rdv) {
         let updatedRendezVous = this.rdvs.find(that => rdv._id == that._id)
         if (updatedRendezVous) {
+            updatedRendezVous.cells[0].destroy()
             updatedRendezVous.destroy()
             this.rdvs = this.rdvs.filter(rdv => rdv._id != updatedRendezVous._id)
         }
+        
     }
 
     _build() {

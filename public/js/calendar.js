@@ -16,7 +16,7 @@ export class Calendar {
 
     _buildHeaders() {
         let month = document.createElement("div")
-        month.innerHTML = Calendar.monthTab[this.displayedMonth.getMonth()]
+        month.innerHTML = Calendar.monthTab[this.displayedMonth.getMonth()] + " " + this.displayedMonth.getFullYear()
         
         let header = document.createElement("div")
         header.classList.add("calendar-header")

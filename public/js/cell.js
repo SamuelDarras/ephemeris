@@ -8,6 +8,7 @@ export class Cell {
     constructor(date, parent, content) {
         this.date = date
         this.content = content
+        this.parent = parent
         content.classList.add("cell-label")
 
         let cell = document.createElement("div")
@@ -53,6 +54,10 @@ export class Cell {
 
     remove(rdv) {
         this.cell.removeChild(this.shards[rdv._id])
+    }
+
+    destroy() {
+        this.parent.removeChild(this.cell)
     }
 
     static associateToRdv(cells, rdv) {

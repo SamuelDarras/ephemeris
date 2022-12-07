@@ -2,6 +2,7 @@ import { Calendar } from "./calendar.js"
 import { Jour } from "./jour.js"
 import { Week } from "./week.js"
 
+
 let vues = [
     new Calendar("calendar"),
     new Week("week"),

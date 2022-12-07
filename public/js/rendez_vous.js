@@ -54,10 +54,10 @@ export class RendezVous {
             let thisEntry = this[entry]
             if (entry.includes("Date")) {
                 newEntry = new Date(newEntry)
-                newEntry.setHours(newEntry.getHours()+1)
+                newEntry.setHours(newEntry.getHours())
 
                 thisEntry = new Date(thisEntry)
-                thisEntry.setHours(thisEntry.getHours()+1)
+                thisEntry.setHours(thisEntry.getHours())
 
                 newEntry = newEntry.getTime()
                 thisEntry = thisEntry.getTime()

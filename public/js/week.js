@@ -17,7 +17,7 @@ export class Week {
 
     _buildHeaders() {
         let month = document.createElement("div")
-        month.innerHTML = Week.monthTab[this.debutSemaine.getMonth()]
+        month.innerHTML = Week.monthTab[this.debutSemaine.getMonth()] + " " + this.debutSemaine.getFullYear()
 
         let header = document.createElement("div")
         header.classList.add("calendar-header")
