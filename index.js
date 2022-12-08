@@ -168,8 +168,16 @@ app.get("/event/get-month/:year/:month", async (req, res) => {
             return
         }
 
-        let debutMois = new Date(req.params.year, 1*req.params.month-1, 1)
-        let finMois = new Date(req.params.year, 1*req.params.month, 1)
+        let debutMois;
+        let finMois;
+
+        debutMois = new Date(req.params.year, 1*req.params.month-1, 1)
+        finMois = new Date(req.params.year, 1*req.params.month, 1)
+
+        if(isNaN(debutMois)){
+            sendError(res, BAD_REQUEST, "Date mal formée")
+            return
+        }
 
         let rdvs = await RendezVous.find({
             $or: [
@@ -191,10 +199,7 @@ app.get("/event/get-month/:year/:month", async (req, res) => {
             ],
             owner: user
         })
-        if (!rdvs) {
-            sendError(res, RESSOURCE_NOT_FOUND)
-            return
-        }
+
         res.status(200).json({
             rdvs: rdvs,
             actions: rdvs.map(rdv => {
@@ -218,6 +223,11 @@ app.get("/event/get-week/:year/:week", async (req, res) => {
         let debutSemaine = new Date(debutAnnee.valueOf() + (req.params.week) * 604800000 - (debutAnnee.getDay()-1) * 86400000);
         let finSemaine = new Date(debutSemaine.getFullYear(), debutSemaine.getMonth(), debutSemaine.getDate() + 7);
 
+        if(isNaN(debutSemaine)){
+            sendError(res, BAD_REQUEST, "Date mal formée")
+            return
+        }
+
         let rdvs = await RendezVous.find({
             $or: [
                 { $and: [
@@ -238,10 +248,7 @@ app.get("/event/get-week/:year/:week", async (req, res) => {
             ],
             owner: user
         })
-        if (!rdvs) {
-            sendError(res, RESSOURCE_NOT_FOUND)
-            return
-        }
+
         res.status(200).json({
             rdvs: rdvs,
             actions: rdvs.map(rdv => {
@@ -264,6 +271,11 @@ app.get("/event/get-day/:year/:month/:day", async (req, res) => {
         let debutJour = new Date(req.params.year, 1*req.params.month-1, req.params.day);
         let finJour = new Date(req.params.year, 1*req.params.month-1, 1*req.params.day+1);
 
+        if(isNaN(debutJour)){
+            sendError(res, BAD_REQUEST, "Date mal formée")
+            return
+        }
+
         let rdvs = await RendezVous.find({
             $or: [
                 { $and: [
@@ -284,10 +296,7 @@ app.get("/event/get-day/:year/:month/:day", async (req, res) => {
             ],
             owner: user
         })
-        if (!rdvs) {
-            sendError(res, RESSOURCE_NOT_FOUND)
-            return
-        }
+        
         res.status(200).json({
             rdvs: rdvs,
             actions: rdvs.map(rdv => {

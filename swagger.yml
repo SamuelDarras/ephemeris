@@ -28,10 +28,24 @@ paths:
               required:
                 - name
                 - password
-      required: true
       responses:
         '200':
-          description: La connexion est réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: string
+                    example: toto
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ
+                  actions:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Actions'
+      required: true
   /event/create:
     post:
       tags:
@@ -59,6 +73,19 @@ paths:
                       $ref: '#/components/schemas/Actions'
         '400':
           description: format des données invalide
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bad request
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
                       
   /event/get/{id}:
     get:
@@ -76,8 +103,34 @@ paths:
       responses:
         '400':
           description: Format de l'id invalide
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bad request
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
         '404':
           description: Aucun événement possédant cet id trouvé
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Ressource not found
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
         '200':
           description: Un événement a été trouvé
           content:
@@ -115,8 +168,19 @@ paths:
       responses:
         '400':
           description: Format de l'année ou du mois invalides
-        '404':
-          description: Aucun événement trouvé pour cette année et ce mois
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bad request
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: Date mal formée
         '200':
           description: des objet événement
           content:
@@ -132,6 +196,117 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Actions'
+                
+  /event/get-week/{year}/{week}:
+    get:
+      tags:
+        - Rendez-vous
+      summary: Trouver tous les événements pour une semaine d'une année donnée
+      parameters:
+        - name: year
+          in: path
+          description: Année de l'événement à trouver
+          required: true
+          schema:
+            type: integer
+            example: 2022
+        - name: week
+          in: path
+          description: Semaine de l'événement à trouver
+          required: true
+          schema:
+            type: integer
+            example: 46
+      responses:
+        '400':
+          description: Format de l'année ou du mois invalides
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bad request
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: Date mal formée
+        '200':
+          description: des objets événements
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  rdvs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompleteRendezVous'
+                  actions:
+                    type: array
+                    items:
+                    $ref: '#/components/schemas/Actions'
+                  
+  /event/get-day/{year}/{month}/{day}:
+    get:
+      tags:
+        - Rendez-vous
+      summary: Trouver tous les événements pour un jour d'une semaine et d'une année donnée
+      parameters:
+        - name: year
+          in: path
+          description: Année de l'événement à trouver
+          required: true
+          schema:
+            type: integer
+            example: 2022
+        - name: month
+          in: path
+          description: Mois de l'événement à trouver
+          required: true
+          schema:
+            type: integer
+            example: 11
+        - name: day
+          in: path
+          description: Jour de l'événement à trouver
+          required: true
+          schema:
+            type: integer
+            example: 15
+      responses:
+        '400':
+          description: Format du jour, du mois ou de l'année invalides
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bad request
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: Date mal formée
+        '200':
+          description: des objets événements
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  rdvs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompleteRendezVous'
+                  actions:
+                    type: array
+                    items:
+                    $ref: '#/components/schemas/Actions'
                       
   /event/edit/{id}:
     post:
@@ -162,10 +337,49 @@ paths:
       responses:
         '400':
           description: Format de l'id invalide
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bad request
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
         '404':
           description: Aucun événement possédant cet id trouvé
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Ressource not found
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
         '401':
           description: Il faut être connecté pour utiliser cette fonctionnalitée
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
         '200':
           description: un objet RendezVous et les actions possibles
           content:
@@ -195,8 +409,49 @@ paths:
       responses:
         '400':
           description: Format de l'id invalide
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bad request
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
         '404':
           description: Aucun événement possédant cet id trouvé
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Ressource not found
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
+        '401':
+          description: Il faut être connecté pour utiliser cette fonctionnalitée
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+                  err:
+                    type: object
+                    propreties:
+                      type: string
+                      example: "..."
         '200':
           description: Un événement a été trouvé et supprimé
           content:
@@ -223,7 +478,7 @@ components:
         title:
           type: string
           example: une choucroute chez mémé
-        date:
+        startDate:
           type: string
           example: "2022-10-25T11:30:00Z"
         endDate:
@@ -243,7 +498,7 @@ components:
         title:
           type: string
           example: title
-        date:
+        startDate:
           type: string
           example: "2022-12-25T00:30:00Z"
         endDate:
@@ -269,7 +524,7 @@ components:
       properties:
         link:
           type: string
-          example: "/event/..."
+          example: "/.../..."
         method: 
           type: string
           example: "post"
