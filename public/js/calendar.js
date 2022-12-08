@@ -41,13 +41,24 @@ export class Calendar {
         if (offset < 0) {
             offset += 7
         }
+        // offset += 7
+
+        let monthEnd = new Date(this.displayedMonth)
+        monthEnd.setMonth(monthEnd.getMonth()+1)
+
+        console.log(this.displayedMonth, monthEnd);
 
         for (let i = 0; i < 7 * 6; i++) {
             let date = new Date(this.displayedMonth.getFullYear(), this.displayedMonth.getMonth(), this.displayedMonth.getDate() - offset + i - 1)
             let content = document.createElement("div")
             content.innerHTML = `${date.getDate()}`
 
+            console.log(date < this.displayedMonth, date > monthEnd, date);
+
             let cell = new Cell(date, container, content)
+            if (date < this.displayedMonth || date >= monthEnd) {
+                cell.cell.classList.add("lesser")
+            }
             this.cells.push(cell)
         }
         this.element.append(container)
@@ -124,7 +135,9 @@ export class Calendar {
     }
 
     show(date) {
-        this.displayedMonth = date
+        this.displayedMonth = new Date(date)
+        this.displayedMonth.setDate(1)
+        this.displayedMonth.setHours(0, 0, 0, 0)
         this._build()
         this.element.style["display"] = ""
     }

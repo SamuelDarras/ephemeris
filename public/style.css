@@ -172,3 +172,7 @@ form {
     display: grid;
     grid-template-columns: repeat(24, 1fr);
 } */
+
+.lesser {
+    background-color: #bab9b9;
+}
