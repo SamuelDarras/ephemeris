@@ -5,7 +5,7 @@ export function openModal(data, title, rdv) {
         let footer = document.getElementsByClassName("modal-footer")[0]
         let deleteButton = document.createElement("div")
         deleteButton.innerHTML = "Supprimer"
-        deleteButton.classList.add("modal-delete", "btn", "btn-danger")
+        deleteButton.classList.add("modal-delete", "btn", "btn-danger", "mx-2")
         deleteButton.onclick = () => {
             let confirmAction = confirm("Êtes-vous sûr de vouloir supprimer ce rendez-vous ?")
             if (confirmAction) {
