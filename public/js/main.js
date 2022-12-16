@@ -1,3 +1,4 @@
+import { openModal, closeModal } from "./modal.js";
 import { Calendar } from "./calendar.js"
 import { Jour } from "./jour.js"
 import { Week } from "./week.js"
@@ -18,6 +19,15 @@ const btnMonthAfter = document.getElementById("btnMonthAfter")
 
 const changeDatePicker = document.getElementById("changeDatePicker")
 changeDatePicker.value = new Date().toISOString().substring(0, 10);
+
+const btnCreateRendezVous = document.getElementById("createRendezVous")
+btnCreateRendezVous.addEventListener("click", evt => {
+    evt.stopPropagation()
+    console.log(c.getStart())
+    let startDate = new Date(c.getStart().getTime() + 1000*60*60*13)
+    let endDate = new Date(startDate.getTime() + 1000*60*15)
+    openModal({ title: "", startDate: startDate, endDate: endDate, place: "", description: "" }, "Créer un événement", null)
+})
 
 btnMonthBefore.addEventListener("click", evt => {c.change("sub", 1)})
 btnMonthAfter.addEventListener("click", evt => {c.change("add", 1)})

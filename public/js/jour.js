@@ -134,4 +134,8 @@ export class Jour {
         this.element.style["display"] = "none"
         return this.displayedDay
     }
+
+    getStart() {
+        return this.displayedDay
+    }
 }

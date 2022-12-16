@@ -135,4 +135,8 @@ export class Week {
         this.element.style["display"] = "none"
         return this.debutSemaine
     }
+
+    getStart() {
+        return this.debutSemaine
+    }
 }

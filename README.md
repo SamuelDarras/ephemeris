@@ -1,7 +1,16 @@
+# Adresse
+
+Port: 3000
+Uri de la documentation de l'API: `/api-docs/`
+
 # Connexion
 
 * utilisateur: test
 * password: test
+
+Utilisateur vierge :
+* utilisateur: test2
+* password: test2
 
 # Technologies
 

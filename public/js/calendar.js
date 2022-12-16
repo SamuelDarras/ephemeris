@@ -41,12 +41,9 @@ export class Calendar {
         if (offset < 0) {
             offset += 7
         }
-        // offset += 7
 
         let monthEnd = new Date(this.displayedMonth)
         monthEnd.setMonth(monthEnd.getMonth()+1)
-
-        console.log(this.displayedMonth, monthEnd);
 
         for (let i = 0; i < 7 * 6; i++) {
             let date = new Date(this.displayedMonth.getFullYear(), this.displayedMonth.getMonth(), this.displayedMonth.getDate() - offset + i - 1)
@@ -143,6 +140,10 @@ export class Calendar {
     }
     hide() {
         this.element.style["display"] = "none"
+        return this.displayedMonth
+    }
+
+    getStart() {
         return this.displayedMonth
     }
 }

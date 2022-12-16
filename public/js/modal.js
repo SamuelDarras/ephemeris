@@ -28,7 +28,7 @@ export function openModal(data, title, rdv) {
     for (let key in data) {
         let value = data[key]
         if (value instanceof Date) {
-            value = new Date(value.toString().split('GMT')[0]+' UTC').toISOString().split('.')[0] //moche mais voila
+           value = new Date(value.toString().split('GMT')[0]+' UTC').toISOString().split('.')[0] //moche mais voila
         }
         document.getElementById(key).value = value.toString()
     }
@@ -39,6 +39,7 @@ export function openModal(data, title, rdv) {
             closeModal()
         }
     }
+    console.log(data)
 
     let validateButton = document.getElementsByClassName("modal-validate")[0]
     validateButton.onclick = (evt) => {
