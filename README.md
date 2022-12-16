@@ -1,7 +1,7 @@
 # Connexion
 
-utilisateur: test
-password: test
+* utilisateur: test
+* password: test
 
 # Technologies
 
